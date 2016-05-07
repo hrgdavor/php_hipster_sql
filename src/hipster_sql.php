@@ -43,6 +43,7 @@ namespace {
 	}
 
 	function hip_build_update($tableName, $values, $filter){
+        if(func_num_args() > 3) $filter = array_slice(func_get_args(),2);
 		return hip_get_db()->build_update($tableName, $values, $filter);
 	}
 

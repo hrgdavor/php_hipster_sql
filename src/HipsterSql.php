@@ -84,14 +84,23 @@ namespace org\hrg\php_hipster_sql{
 			if(func_num_args() > 1) $query = func_get_args();
 
 			if(is_array($query)){
-				$ret = $query[0];
+				
 				$count = count($query);
+				if($count == 0) return '';
+				$ret = $query[0];
+
 				for($i=1; $i<$count; $i++){
+				
+					$queryPart = $query[$i];
+				
 					if($i%2 == 0) 
-						$ret .= $query[$i];
-					else 
-						$ret .= $this->q_value($query[$i]);
+						$ret .= $queryPart;
+					else if(is_array($queryPart))
+						$ret .= $this->build($queryPart);
+					else
+						$ret .= $this->q_value($queryPart);
 				}
+				
 				return $ret;
 			}
 			return $query;
@@ -116,6 +125,8 @@ namespace org\hrg\php_hipster_sql{
 
 		/** generate update statement out of an array */
 		function build_update($tableName, $values, $filter){
+	        if(func_num_args() > 3) $filter = array_slice(func_get_args(),2);
+
 			$ret = array();
 			$delim = '';
 			foreach($values as $field=>$value){
@@ -130,10 +141,8 @@ namespace org\hrg\php_hipster_sql{
 			}
 			// filter is not optional on purpose to avoid accidental update on whole table 
 			if($filter != 'all_rows'){
-				$ret[] = ' WHERE '.$filter;
-				$arr = func_get_args();
-				$count = count($arr);
-				for($i=3; $i<$count; $i++) $ret[] = $arr[$i];
+				$ret[] = ' WHERE ';
+				$ret = $this->concat($ret, $filter);
 			}
 
 			return $ret;
