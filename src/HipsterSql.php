@@ -49,7 +49,7 @@ namespace org\hrg\php_hipster_sql{
 		be at odd indices in the array. Simply appending the arrays can result in malformed array. <br>
 		Also handles concating string queries with prepared statements (arrays). */
 		final function concat(){
-			$this->_concat(func_get_args());
+			return $this->_concat(func_get_args());
 		}
 
 		/** Extracted to receive array and not variable parameters. Allows for procedural style functions to use variable parameters (func_get_args).*/
