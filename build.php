@@ -37,19 +37,30 @@ echo '<pre>';
 foreach ($todo as $out_file => $deps) {
 	$all_deps = all_deps($deps);
 	$str = $out_file." GENERATED FROM: \n - ".implode("\n - ", $all_deps);
-	echo $str."\n\n";
+	echo $str."\n";
+	$out_ful_path = $out_dir .'/'. $out_file;
 
-	$fp = fopen($out_dir .'/'. $out_file,'w');
-	fputs($fp,"<?php\n/*\n$str\n*/\n");
+	$str = "<?php\n/*\n$str\n*/\n";
+	$oldData = "";
+	if(file_exists($out_ful_path)) $oldData = file_get_contents($out_ful_path);
+
 	foreach ($all_deps as $dep) {
-		fputs($fp,"\n/*\n$dep\n*/\n");
+		$str .= "\n/*\n$dep\n*/\n";
 		$lines = file($src_dir.'/'.$dep);
 		array_shift($lines);
 		foreach ($lines as $line) {
-			fputs($fp,$line);
+			$str .= $line;
 		}
 	}
-	fclose($fp);
+	
+	if($str == $oldData){
+		echo "<i style=\"color:gray\">Skiiping write, identical content</i>\n";
+	}else{
+		$fp = fopen($out_ful_path,'w');
+		fputs($fp,$str);
+		fclose($fp);
+	}
+	echo "\n";
 }
 
 
