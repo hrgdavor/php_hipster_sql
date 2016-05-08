@@ -31,9 +31,14 @@ namespace {
 	}
 
 	function hip_concat(){
-		// use internal version that accepts array
-		return hip_get_db()->_concat(func_get_args());	
+		$ret = array();
+		return hip_get_db()->_append($ret,func_get_args());
 	}
+
+	function append(&$left){
+		return hip_get_db()->_append($left, array_slice(func_get_args(),1) );
+	}
+
 	function hip_build($sql){
 		return hip_get_db()->build(func_num_args() > 1 ? func_get_args():$sql);
 	}

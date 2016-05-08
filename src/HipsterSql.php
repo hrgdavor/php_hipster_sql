@@ -49,17 +49,19 @@ namespace org\hrg\php_hipster_sql{
 		be at odd indices in the array. Simply appending the arrays can result in malformed array. <br>
 		Also handles concating string queries with prepared statements (arrays). */
 		final function concat(){
-			return $this->_concat(func_get_args());
+			$ret = array();
+			return $this->_append($ret,func_get_args());
 		}
 
-		/** Extracted to receive array and not variable parameters. Allows for procedural style functions to use variable parameters (func_get_args).*/
-		function _concat($arr){
-			
-			$left = $arr[0];
-			if(!is_array($left)) $left = array($left);// half less cases to handle :)
+		/** Append more queries to the existing one. Similar to concat, except it changes the firs array instead of returning new one.*/
+		final function append(&$left){
+			return $this->_append($left, array_slice(func_get_args(),1) );
+		}
+
+		function _append(&$left, $arr){
 			
 			$count = count($arr);
-			for($i=1; $i<$count; $i++){
+			for($i=0; $i<$count; $i++){
 				$right = $arr[$i];
 				if(!is_array($right)) $right = array($right);// even less cases to handle :)
 
