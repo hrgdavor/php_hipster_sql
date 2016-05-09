@@ -19,7 +19,6 @@ assert_equal(
 );
 
 /** TEST concat */
-
 assert_equal(
 	hip_build(hip_concat('select id,name ','from users where id=1')),
 	'select id,name from users where id=1'
@@ -48,6 +47,57 @@ assert_equal(
 assert_equal(
 	hip_build(hip_concat(array('select id,','name',' '),array('from users where id=','1a'))),
 	'select id,\'name\' from users where id=\'1a\''
+);
+
+/** TEST implode */
+assert_equal(
+	hip_build( hip_implode(' AND ', array(array('id=',1)) ) ),
+	'id=1'
+);
+
+assert_equal(
+	hip_build( hip_implode(' AND ', array(array('id=',1),array('date>',array('NOW()'))) ) ),
+	'id=1 AND date>NOW()'
+);
+
+assert_equal(
+	count( hip_implode(' AND ', array(array()) ) ),
+	0
+);
+
+assert_equal(
+	hip_build( hip_implode(' AND ', array(array()) ) ),
+	''
+);
+
+/** TEST implode_values */
+assert_equal(
+	hip_implode_values(',', array(1,2,3) ),
+	array('',1,',',2,',',3)
+);
+
+$tmp = hip_implode_values(',', array(1,2,3) );
+assert_equal(
+	hip_build('id IN (', $tmp, ')' ),
+	"id IN (1,2,3)"
+);
+
+
+/** TEST flatten */
+assert_equal(
+	hip_flatten( array('WHERE id=', 1, ' AND pasword=', array('PASSWORD(','aaa',')') ) ),
+	array('WHERE id=', 1, ' AND pasword=PASSWORD(','aaa',')') 
+);
+
+/** TEST prepare */
+assert_equal(
+	hip_prepare( array('WHERE id=', 1 ) ),
+	array('WHERE id=?',array(1))
+);
+
+assert_equal(
+	hip_prepare( array('WHERE id=', 1, ' AND is_deleted=',0 ) ),
+	array('WHERE id=? AND is_deleted=?',array(1,0))
 );
 
 $userData = ['name'=>'John','email'=>'john@gmail.com'];

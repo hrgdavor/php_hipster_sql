@@ -10,6 +10,9 @@ namespace org\hrg\php_hipster_sql{
 		var $result;
 		var $connection;
 
+		var $columQuote1 = '"';
+		var $columQuote2 = '"';
+
 		/* Last query that was executed. Usefull when troubleshooting */
 		public function last_query(){
 		    return $this->last_query; 
@@ -36,50 +39,167 @@ namespace org\hrg\php_hipster_sql{
 
 		/* Convert to valid column name */
 		function q_column($str){
-			return '"'.$this->escape($str).'"';
+			return $this->columQuote1.$this->escape($str).$this->columQuote2;
 		}
 
 		/* Convert to valid table name */
 		function q_table($str){
-			return '"'.$this->escape($str).'"';
+			return $this->columQuote1.$this->escape($str).$this->columQuote2;
+		}
+
+		final function implode($glue, $arr){
+			if(func_num_args() >2 ) $arr = array_slice(func_get_args(),1) ;
+
+			$count = count($arr);
+			$ret = array();
+			$first = true;
+
+			for($i=0; $i<$count; $i++){
+				if(!count($arr[$i])) continue;
+
+				if(!$first) $this->_append($ret,$glue);
+				$this->_append($ret,$arr[$i]);
+
+				$first = false;
+			}
+
+			return $ret;
+		}
+
+		final function implode_values($glue, $arr){
+			if(func_num_args() >2 ) $arr = array_slice(func_get_args(),1) ;
+
+			$count = count($arr);
+			$ret = array('');
+
+			for($i=0; $i<$count; $i++){
+				if($i>0) $ret[] = $glue;
+				$ret[] = $arr[$i];
+			}
+
+			return $ret;
 		}
 
 		/** Concatenate 2 or more queries. When concatenating 2 prepared statements (arrays in our case) we need to make sure that
 		the resulting array maintains the requirement for the prepared statement arrays. The requirement is that variables must
 		be at odd indices in the array. Simply appending the arrays can result in malformed array. <br>
-		Also handles concating string queries with prepared statements (arrays). */
-		final function concat(){
+		Also handles concating string queries with prepared statements (arrays). If singel argument is provided it is interpreted as
+		that argument contains an array with queries we want to concatenate */
+		final function concat($arr){
 			$ret = array();
-			return $this->_append($ret,func_get_args());
+			return $this->_append_all( $ret, func_num_args() > 1 ?  func_get_args():$arr );
 		}
 
 		/** Append more queries to the existing one. Similar to concat, except it changes the firs array instead of returning new one.*/
 		final function append(&$left){
-			return $this->_append($left, array_slice(func_get_args(),1) );
+			return $this->_append_all($left, array_slice(func_get_args(),1) );
 		}
 
-		function _append(&$left, $arr){
-			
+		function _append_all(&$left, $arr){
 			$count = count($arr);
 			for($i=0; $i<$count; $i++){
-				$right = $arr[$i];
-				if(!is_array($right)) $right = array($right);// even less cases to handle :)
+				$this->_append($left, $arr[$i]);
+			}
+			return $left;
+		}
 
-				$countRight = count($right);
+		/** append value part to the query. */ 
+		function _append_value(&$left, $val){
+			if(is_array($val)){// if value is array, then it is actually a query that can be apended as usual
+				$this->append($left, $val);
+			}else{
+				$countLeft = count($left);	
+				if($countLeft %2 == 0){// last element is a value
+					// this usually should not happen, @TODO consider throwing an error
+					$left[] = '';
+				}
+				$left[] = $val;
+			}
+		}
+
+		function _append(&$left, $right){
+			if(!is_array($right)) $right = array($right);// less cases to handle :)
+
+			$countRight = count($right);
+			$countLeft = count($left);
+
+			$j = 0;
+			if($countLeft %2 == 1){// last element is a query string, so concat the last element from $left and first element from $right
+				$left[$countLeft-1] .= $right[0];
+				$j=1;// move index to 1 to skip that one as it is already added
+			}
+
+			for(;$j<$countRight; $j++){
+				$left[] = $right[$j];
+			}
+		}
+
+		/* Flatten the query so no nested arrays are left. The resulting array must produce same query as the input array
+		when build is called on it. This is utility to simplify generating prepared statements, as the preparing code does not have to vorry
+		about nested arrays.*/
+		function flatten($sql){
+			if(is_array($sql)){
+				$left = array();
+				$this->_flatten($left, $sql);
+				return $left;
+			}else
+				return $sql;
+		}
+
+		function _flatten(&$left, $right){
+			$countRight = count($right);
+			
+			for($i=0; $i<$countRight; $i++){
+				
 				$countLeft = count($left);
+				
+				if(is_array($right[$i])){
+					$this->_flatten($left, $right[$i]);
+				
+				}else if($i%2 == 0){// right: sql code
+					
+					if($countLeft %2 == 1 && $countLeft > 0){// left: sql code
+						$left[$countLeft-1] .= $right[$i];
+					}else{// left: variable
+						$left[] = $right[$i];
+					}
 
-				$j = 0;
-				if($countLeft %2 == 1){// last element is a query string, so concat the last element from $left and first element from $right
-					$left[$countLeft-1] .= $right[0];
-					$j=1;// move index to 1 to skip that one as it is already added
+				}else{// right: variable
+
+					if($countLeft %2 == 0){// last element is a value
+						// this usually should not happen, @TODO consider throwing an error
+						$left[] = '';
+					}
+					$left[] = $right[$i];
 				}
 
-				for(;$j<$countRight; $j++){
-					$left[] = $right[$j];
-				}
 			}
 
 			return $left;
+		}
+
+		function prepare($sql){
+			$params = array();
+			
+			$sql = $this->flatten($sql);
+
+			if(is_array($sql) && count($sql>1)){
+				$this->last_query = $sql;
+				
+				$query = $sql[0];
+				$count = count($sql);
+				for($i=1; $i<$count; $i++){
+					if($i%2 == 0) 
+						$query .= $sql[$i];
+					else {
+						$query .= '?';
+						$params[] = $sql[$i];
+					}
+				}
+			}else{
+				$query = $this->build($sql);
+			}
+			return array($query, $params);
 		}
 
 		function build($query){

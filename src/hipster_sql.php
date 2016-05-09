@@ -30,13 +30,30 @@ namespace {
 		return hip_get_db()->q_value($str);
 	}
 
-	function hip_concat(){
-		$ret = array();
-		return hip_get_db()->_append($ret,func_get_args());
+	function hip_concat($arr){
+		return hip_get_db()->concat(func_num_args() > 1 ? func_get_args():$arr );
 	}
 
-	function append(&$left){
-		return hip_get_db()->_append($left, array_slice(func_get_args(),1) );
+	function hip_implode($glue, $arr){
+		if(func_num_args() >2 ) $arr = array_slice(func_get_args(),1) ;
+		return hip_get_db()->implode( $glue, $arr );
+	}
+
+	function hip_implode_values($glue, $arr){
+		if(func_num_args() >2 ) $arr = array_slice(func_get_args(),1) ;
+		return hip_get_db()->implode_values( $glue, $arr );
+	}
+
+	function hip_append(&$left){
+		return hip_get_db()->_append_all($left, array_slice(func_get_args(),1) );
+	}
+
+	function hip_flatten($sql){
+		return hip_get_db()->flatten($sql);
+	}
+
+	function hip_prepare($sql){
+		return hip_get_db()->prepare($sql);
 	}
 
 	function hip_build($sql){

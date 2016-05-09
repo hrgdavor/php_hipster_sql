@@ -7,16 +7,7 @@ namespace org\hrg\php_hipster_sql{
 		
 		function SqlPdoMysql(){
 			$this->db_type = 'mysql';
-		}
-
-		/* Convert to valid column name and escape if needed */
-		function q_column($str){
-			return '`'.$this->escape($str).'`';
-		}
-
-		/* Convert to valid column name */
-		function q_table($str){
-			return '`'.$this->escape($str).'`';
+			$this->columQuote1 = $this->columQuote2 = '`';
 		}
 
 	}

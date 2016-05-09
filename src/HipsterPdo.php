@@ -6,7 +6,7 @@ namespace org\hrg\php_hipster_sql{
 
 	class HipsterPdo extends HipsterSql{
 		var $db_type = 'mysql';
-		
+
 		function SqlPdo($db_type){
 			$this->db_type = $db_type;
 		}
@@ -59,24 +59,9 @@ namespace org\hrg\php_hipster_sql{
 
 			if(func_num_args() > 1) $sql = func_get_args();
 			
-			$params = array();
+			list($query, $params) = $this->prepare($sql);
 			
-			if(is_array($sql) && count($sql>1)){
-				$this->last_query = $sql;
-				$query = $sql[0];
-				$count = count($sql);
-				for($i=1; $i<$count; $i++){
-					if($i%2 == 0) 
-						$query .= $sql[$i];
-					else {
-						$query .= '?';
-						$params[] = $sql[$i];
-					}
-				}
-			}else{
-				$query = $this->build($sql);
-				$this->last_query = $query;
-			}
+			$this->last_query = $sql;
 
 			$this->result = $this->connection->prepare($query) or $this->qdie('QUERY: '.$this->last_query());
 			$this->result->execute($params) or $this->qdie('QUERY: '.$this->last_query());
