@@ -5,9 +5,10 @@ namespace org\hrg\php_hipster_sql{
 	use PDO;
 
 	class HipsterPdo extends HipsterSql{
-		var $db_type = 'mysql';
+		protected $db_type = 'mysql';
+		protected $last_prepared;
 
-		function SqlPdo($db_type){
+		function __construct($db_type){
 			$this->db_type = $db_type;
 		}
 
@@ -19,6 +20,10 @@ namespace org\hrg\php_hipster_sql{
 	    		$pass,
 	    		$attr
 			);
+		}
+
+		public function last_query(){
+			return parent::last_query()."\n".print_r($this->last_prepared,true);
 		}
 
 		function quote($str){
@@ -47,21 +52,16 @@ namespace org\hrg\php_hipster_sql{
 			@$this->connection->close();
 		}
 
-		public function last_query(){
-			if(is_array($this->last_query))
-				$this->last_query = $this->build($this->last_query);
-
-		    return $this->last_query; 
-		}
-
 		function query($sql){
 			$this->close_result();
 
 			if(func_num_args() > 1) $sql = func_get_args();
 			
-			list($query, $params) = $this->prepare($sql);
-			
 			$this->last_query = $sql;
+			list($query, $params) = $this->prepare($sql);
+
+			$this->last_prepared = array($query, $params);
+			
 
 			$this->result = $this->connection->prepare($query) or $this->qdie('QUERY: '.$this->last_query());
 			$this->result->execute($params) or $this->qdie('QUERY: '.$this->last_query());
@@ -107,10 +107,8 @@ namespace org\hrg\php_hipster_sql{
 			if(func_num_args() > 3) $sql = array_slice(func_get_args(),2);
 
 			if($limit == 0) return $this->rows($sql);
-
-			$query = $this->build($sql);
-
-			return $this->rows($query.' LIMIT '.$from.',', $limit);
+			// DIRTY FIX STUPID PDO.. PDO treats parameters as strings, so create the string our selves, instead of using parameters 
+			return $this->rows($this->concat($sql,array(' LIMIT '. ($limit+0) .' OFFSET '. ($from+0) )));
 		}
 
 		/** get the first row as associative array */

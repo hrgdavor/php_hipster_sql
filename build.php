@@ -1,6 +1,7 @@
 <?
 $src_dir = 'src';
 $out_dir = 'build';
+$version = "0.2.0";
 
 if(!file_exists($out_dir)){
 	mkdir($out_dir);
@@ -40,7 +41,7 @@ foreach ($todo as $out_file => $deps) {
 	echo $str."\n";
 	$out_ful_path = $out_dir .'/'. $out_file;
 
-	$str = "<?php\n/*\n$str\n*/\n";
+	$str = "<?php\n/*\nVersion $version $str\n*/\n";
 	$oldData = "";
 	if(file_exists($out_ful_path)) $oldData = file_get_contents($out_ful_path);
 

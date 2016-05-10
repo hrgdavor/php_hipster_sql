@@ -60,6 +60,26 @@ namespace {
 		return hip_get_db()->build(func_num_args() > 1 ? func_get_args():$sql);
 	}
 
+	function hip_build_where($op,$arr){
+		return hip_get_db()->build_where($op,$arr);
+	}
+
+	function hip_build_where_and($arr){
+		return hip_get_db()->build_where_and($arr);
+	}
+
+	function hip_build_where_or($arr){
+		return hip_get_db()->build_where_or($arr);
+	}
+
+	function hip_build_and($arr){
+		return hip_get_db()->build_and($arr);
+	}
+
+	function hip_build_or($arr){
+		return hip_get_db()->build_or($arr);
+	}
+
 	function hip_build_insert($tableName, $values){
 		return hip_get_db()->build_insert($tableName, $values);
 	}

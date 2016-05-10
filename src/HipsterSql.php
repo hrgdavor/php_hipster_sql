@@ -6,15 +6,17 @@ namespace org\hrg\php_hipster_sql{
 	Base class that database specific implementations will exted.
 	*/
 	class HipsterSql{
-		var $last_query;
-		var $result;
-		var $connection;
+		protected $last_query;
+		protected $result;
+		protected $connection;
 
-		var $columQuote1 = '"';
-		var $columQuote2 = '"';
+		protected $columQuote1 = '"';
+		protected $columQuote2 = '"';
 
 		/* Last query that was executed. Usefull when troubleshooting */
 		public function last_query(){
+			if(is_array($this->last_query))
+				return print_r($this->last_query,true)."\n".$this->build($this->last_query);
 		    return $this->last_query; 
 		}
 
@@ -184,7 +186,6 @@ namespace org\hrg\php_hipster_sql{
 			$sql = $this->flatten($sql);
 
 			if(is_array($sql) && count($sql>1)){
-				$this->last_query = $sql;
 				
 				$query = $sql[0];
 				$count = count($sql);
@@ -209,6 +210,8 @@ namespace org\hrg\php_hipster_sql{
 				
 				$count = count($query);
 				if($count == 0) return '';
+				if($count == 1) return $this->build($query[0]);
+
 				$ret = $query[0];
 
 				for($i=1; $i<$count; $i++){
@@ -226,6 +229,29 @@ namespace org\hrg\php_hipster_sql{
 				return $ret;
 			}
 			return $query;
+		}
+
+		function build_where($op,$arr){
+			if(!count($arr)) return array();
+			return array('WHERE ', $this->implode(' '.$op.' ',$arr) );
+		}
+
+		function build_where_and($arr){
+			return $this->build_where('AND',$arr);
+		}
+
+		function build_where_or($arr){
+			return $this->build_where('OR',$arr);
+		}
+
+		function build_and($arr){
+			if(!count($arr)) return array();
+			return array('( ', $this->implode(' AND ',$arr), ' )' );
+		}
+
+		function build_or($arr){
+			if(!count($arr)) return array();
+			return array('( ', $this->implode(' OR ',$arr), ' )' );
 		}
 
 		function build_insert($tableName, $values){

@@ -8,7 +8,7 @@ namespace org\hrg\php_hipster_sql{
 		var $db_type = 'pgsql';
 		
 
-		function SqlPdoPg(){
+		function __construct(){
 			$this->db_type = 'pgsql';
 		}
 
