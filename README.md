@@ -36,7 +36,7 @@ $count =   $DB->one("SELECT count(*) from city");
 ```
 
 ## SQL injection and value quoting
-__If you do not concatenate user provided value to the query string yourself !__
+__DO NOT concatenate user provided values to the query string yourself !__
 
 You get automatic value quoting and safety from SQL injection for free. Read more details on the queries expressed as arrays 
 [here](doc/array_queries.md).
