@@ -36,9 +36,9 @@ __Odd elements are values that need quoting.__ _(if value is array, it is treate
 
 The idea comes from making a classic case of concatenating static query parts and values into a query string.
 
-Example complex query across umltiple lines using naive concatenation
+Example complex query across multiple lines using simple concatenation
 ```php
-// each variable could be escaped beforehand, but it becomes tiresome
+// each variable could be escaped beforehand, but it becomes tiresome, and is more prone to errors
 $sql = "SELECT * FROM bills WHERE bill_date >= '".$from."' AND bill_date <= '".$to."' ORDER by bill_date";
 ```
 
