@@ -61,15 +61,15 @@ $row = hip_row("SELECT * from article WHERE id=" , $_GET['id']);
 All functions that perform queries accept these argument styles:
 ```php
 // 1. string query
-$countries = sql_rows("SELECT * from country");
+$countries = hip_rows("SELECT * from country");
 
 // 2. array
-$user = sql_row(array("SELECT * from user WHERE id=" , $id));
-$user = sql_row(array("SELECT * from user WHERE username=" , $username , " AND is_deleted=" , $deleted));
+$user = hip_row(array("SELECT * from user WHERE id=" , $id));
+$user = hip_row(array("SELECT * from user WHERE username=" , $username , " AND is_deleted=" , $deleted));
 
 // 3. variable number of arguments are treated same as array (`using func_get_args()``)
-$user = sql_row("SELECT * from user WHERE id=" , $id);
-$user = sql_row("SELECT * from user WHERE username=" , $username , " AND is_deleted=" , $deleted);
+$user = hip_row("SELECT * from user WHERE id=" , $id);
+$user = hip_row("SELECT * from user WHERE username=" , $username , " AND is_deleted=" , $deleted);
 ```
 
 [rad more](doc/array_queries.md)
