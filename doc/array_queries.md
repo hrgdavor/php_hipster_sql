@@ -58,7 +58,7 @@ The PDO versions of the library do not build the query string, but prepare and e
 
 To see the prepared statement and the arguments, call `hip_prepare($sql)`
 ```php
-print_r hip_prepare($sql);
+print_r(hip_prepare($sql));
 /* output: if $from = '2000-01-01' and $to = '2000-01-31'
 Array
 (
