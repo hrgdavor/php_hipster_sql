@@ -36,7 +36,7 @@ $page =    $DB->rows_limit($offset, $limit, "SELECT * FROM users");// db specifi
 $count =   $DB->one("SELECT count(*) from city");
 ```
 
-# SQL injection and value quoting
+## SQL injection and value quoting
 The simplest way I made my pages vulnerable to SQL injections was this:
 ```php
 // unsafe
