@@ -56,7 +56,7 @@ echo hip_build($sql);
 
 The PDO versions of the library do not build the query string, but prepare and execute prepared statements. 
 
-T1o see the prepared statement and arguments call `hip_prepare($sql)`
+To see the prepared statement and the arguments, call `hip_prepare($sql)`
 ```php
 print_r hip_prepare($sql);
 /* output: if $from = '2000-01-01' and $to = '2000-01-31'
