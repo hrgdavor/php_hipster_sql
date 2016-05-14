@@ -2,7 +2,6 @@
 PHP SQL helper library before ORM was cool.
 
 
-
 ## Getting the files
 Choose one of pre-built bundles from a [release](https://github.com/hrgdavor/php_hipster_sql/releases) or build the bundles yourself after downloading the source. 
 
@@ -72,7 +71,7 @@ $user = hip_row("SELECT * from user WHERE id=" , $id);
 $user = hip_row("SELECT * from user WHERE username=" , $username , " AND is_deleted=" , $deleted);
 ```
 
-[rad more](doc/array_queries.md)
+[rad more](doc/array_queries.md) about array queries.
 
 ## 99%+
  - 99% of times you only need one connection to the database. ( more: multiple connections )
