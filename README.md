@@ -72,6 +72,8 @@ $user = sql_row("SELECT * from user WHERE id=" , $id);
 $user = sql_row("SELECT * from user WHERE username=" , $username , " AND is_deleted=" , $deleted);
 ```
 
+[rad more](doc/array_queries.md)
+
 ## 99%+
  - 99% of times you only need one connection to the database. ( more: multiple connections )
  - 99% of times you want get all the results you queried for. ( more: just give me the data )
