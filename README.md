@@ -4,10 +4,9 @@ PHP SQL helper library before ORM was cool.
 
 
 ## Getting the files
-Download the source or check the available [releases](https://github.com/hrgdavor/php_hipster_sql/releases)
+Choose one of pre-built bundles from a [release](https://github.com/hrgdavor/php_hipster_sql/releases) or build the bundles yourself after downloading the source. 
 
-Choose one of pre-built bundles from a release or build the bundles yourself after downloading the source. 
-To build the bundles from source just run build.php from CLI or from a web server.
+To build the bundles from source just run `build.php` from CLI or from a web server.
 
 
 ## Connecting to database
