@@ -21,11 +21,11 @@ This is only syntax sugar to allow for cleaner code (less verbose). The paramete
 // 1. string query is treated as array with the string as only element
 array("SELECT * from country");
 
-// 2. array - that is what is actaually used internally
+// 2. array - is actaually same as used internally
 array("SELECT * from user WHERE id=" , $id);
 array("SELECT * from user WHERE username=" , $username , " AND is_deleted=" , $deleted);
 
-// 3. variable number of arguments are treated same as array ( using func_get_args() )
+// 3. variable number of arguments are converted to array `using func_get_args()` 
 array("SELECT * from user WHERE id=" , $id);
 array("SELECT * from user WHERE username=" , $username , " AND is_deleted=" , $deleted);
 ```

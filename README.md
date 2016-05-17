@@ -35,7 +35,7 @@ $page =    $DB->rows_limit($offset, $limit, "SELECT * FROM users");// db specifi
 $count =   $DB->one("SELECT count(*) from city");
 ```
 
-## SQL injection and value quoting
+## SQL injection safety and value quoting for FREE
 __DO NOT concatenate user provided values to the query string yourself !__
 
 You get automatic value quoting and safety from SQL injection for free. Read more details on the queries expressed as arrays 
@@ -43,7 +43,7 @@ You get automatic value quoting and safety from SQL injection for free. Read mor
 
 To get a quick idea, read the rest of this section.
 
-The simplest way I made my pages vulnerable to SQL injections was this:
+The simplest way I made my pages vulnerable to SQL injections was this (simple fix example included):
 ```php
 // unsafe
 $result = mysql_query("SELECT * from article WHERE id=" . $_GET['id']);
@@ -55,20 +55,6 @@ $row = hip_row("SELECT * from article WHERE id=" . $_GET['id']);
 // SAFE :) ... and the difference is just one character
 $row = hip_row("SELECT * from article WHERE id=" , $_GET['id']);
 
-```
-
-All functions that perform queries accept these argument styles:
-```php
-// 1. string query
-$countries = hip_rows("SELECT * from country");
-
-// 2. array
-$user = hip_row(array("SELECT * from user WHERE id=" , $id));
-$user = hip_row(array("SELECT * from user WHERE username=" , $username , " AND is_deleted=" , $deleted));
-
-// 3. variable number of arguments are treated same as array (`using func_get_args()``)
-$user = hip_row("SELECT * from user WHERE id=" , $id);
-$user = hip_row("SELECT * from user WHERE username=" , $username , " AND is_deleted=" , $deleted);
 ```
 
 [rad more](doc/array_queries.md) about array queries.
