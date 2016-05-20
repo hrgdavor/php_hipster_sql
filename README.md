@@ -26,7 +26,7 @@ $page =    hip_rows_limit($offset, $limit, "SELECT * FROM users");// db specific
 $count =   hip_one("SELECT count(*) from city");
 ```
 
-Object oriented version, that also allows for more connections on top of the default one used in procedural style.
+Object oriented version, that also allows for more connections _(on top of the one used in procedural style)_.
 
 ```php
 $rows =    $DB->rows("SELECT * from coutnry"); // two diemnsional array
