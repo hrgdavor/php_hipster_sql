@@ -18,6 +18,10 @@ namespace {
 		return hip_get_db()->escape($str);
 	}
 
+	function hip_q($sql=null){
+		return hip_get_db()->q(func_num_args() == 1 ? $sql:func_get_args());
+	}	
+
 	function hip_q_column($str){
 		return hip_get_db()->q_column($str);
 	}
@@ -44,16 +48,8 @@ namespace {
 		return hip_get_db()->implode_values( $glue, $arr );
 	}
 
-	function hip_append(&$left){
-		return hip_get_db()->_append_all($left, array_slice(func_get_args(),1) );
-	}
-
-	function hip_flatten($sql){
-		return hip_get_db()->flatten($sql);
-	}
-
 	function hip_prepare($sql){
-		return hip_get_db()->prepare($sql);
+		return hip_get_db()->prepare(func_num_args() > 1 ?  func_get_args():$sql);
 	}
 
 	function hip_build($sql){

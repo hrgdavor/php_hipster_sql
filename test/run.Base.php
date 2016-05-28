@@ -1,6 +1,7 @@
 <?php
 require_once "simple_test.php";
 
+require_once "../src/Query.php";
 require_once "../src/HipsterSql.php";
 // all tests are duplicated here from run.Base.procedural.php to make sure both vversions work and no parameters are lost
 
@@ -51,28 +52,33 @@ assert_equal(
 
 /** TEST implode */
 assert_equal(
-	$DB->build( $DB->implode(' AND ', array(array('id=',1)) ) ),
+	$DB->build( $DB->implode(' AND ', array($DB->q('id=',1) )) ),
 	'id=1'
 );
 
 assert_equal(
-	$DB->build( $DB->implode(' AND ', array(array('id=',1),array('date>',array('NOW()'))) ) ),
+	$DB->build( $DB->implode(' AND ', array($DB->q('id=',1),$DB->q('date>',$DB->q('NOW()'))) ) ),
 	'id=1 AND date>NOW()'
 );
 
 assert_equal(
-	count( $DB->implode(' AND ', array(array()) ) ),
-	0
+	$DB->build( $DB->implode(' AND ', array($DB->q('id=',1),$DB->q('date>','2016-01-01')) ) ),
+	'id=1 AND date>\'2016-01-01\''
 );
 
 assert_equal(
-	$DB->build( $DB->implode(' AND ', array(array()) ) ),
+	$DB->implode(' AND ', array($DB->q()) )->is_empty(),
+	true
+);
+
+assert_equal(
+	$DB->build( $DB->implode(' AND ', array($DB->q()) ) ),
 	''
 );
 
 /** TEST implode_values */
 assert_equal(
-	$DB->implode_values(',', array(1,2,3) ),
+	$DB->implode_values(',', array(1,2,3) )->get_query_array(),
 	array('',1,',',2,',',3)
 );
 
@@ -85,7 +91,7 @@ assert_equal(
 
 /** TEST flatten */
 assert_equal(
-	$DB->flatten( array('WHERE id=', 1, ' AND pasword=', array('PASSWORD(','aaa',')') ) ),
+	$DB->q( 'WHERE id=', 1, ' AND pasword=', $DB->q('PASSWORD(','aaa',')') ) ->flatten()->get_query_array(),
 	array('WHERE id=', 1, ' AND pasword=PASSWORD(','aaa',')') 
 );
 
@@ -104,12 +110,13 @@ $userData = ['name'=>'John','email'=>'john@gmail.com'];
 
 $id = 1;
 $password = 'reek';
+
 assert_equal(
 	$DB->build( $DB->build_update('users',$userData, 'id=',$id) ),
 	"UPDATE \"users\" SET \"name\"='John', \"email\"='john@gmail.com' WHERE id=1"
 );
 
-$userData = ['name'=>'John','email'=>'john@gmail.com', 'password'=>array('PASSWORD(',$password,')') ];
+$userData = ['name'=>'John','email'=>'john@gmail.com', 'password'=>$DB->q('PASSWORD(',$password,')') ];
 
 $id = 1;
 assert_equal(

@@ -7,6 +7,7 @@ if(!file_exists($out_dir)){
 	mkdir($out_dir);
 }
 
+$req['HipsterSql.php']  = array('Query.php');
 // dependencies
 $req['HipsterMysql.php']  = array('HipsterSql.php');
 $req['HipsterMysqli.php'] = array('HipsterSql.php');
@@ -19,19 +20,19 @@ $req['HipsterPdoPg.php']    = array('HipsterPdo.php');
 // build outputs
 
 $todo['combined.HipsterMysql.php'] = array('HipsterMysql.php');
-$todo['totally.HipsterMysql.php']  = array('HipsterMysql.php','hipster_sql.php');
+$todo['totally.HipsterMysql.php']  = array('hipster_sql.php','HipsterMysql.php');
 
 $todo['combined.HipsterMysqli.php'] = array('HipsterMysqli.php');
-$todo['totally.HipsterMysqli.php']  = array('HipsterMysqli.php','hipster_sql.php');
+$todo['totally.HipsterMysqli.php']  = array('hipster_sql.php','HipsterMysqli.php');
 
 $todo['combined.HipsterSqlSrv.php'] = array('HipsterSqlSrv.php');
-$todo['totally.HipsterSqlSrv.php']  = array('HipsterSqlSrv.php','hipster_sql.php');
+$todo['totally.HipsterSqlSrv.php']  = array('hipster_sql.php','HipsterSqlSrv.php');
 
 $todo['combined.HipsterPdoMysql.php'] = array('HipsterPdoMysql.php');
-$todo['totally.HipsterPdoMysql.php']  = array('HipsterPdoMysql.php','hipster_sql.php');
+$todo['totally.HipsterPdoMysql.php']  = array('hipster_sql.php','HipsterPdoMysql.php');
 
 $todo['combined.HipsterPdoPg.php'] = array('HipsterPdoPg.php');
-$todo['totally.HipsterPdoPg.php']  = array('HipsterPdoPg.php','hipster_sql.php');
+$todo['totally.HipsterPdoPg.php']  = array('hipster_sql.php','HipsterPdoPg.php');
 
 echo '<pre>';
 

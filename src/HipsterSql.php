@@ -1,9 +1,9 @@
-<?
+<?php
 
 namespace org\hrg\php_hipster_sql{
 
 	/*
-	Base class that database specific implementations will exted.
+	Base class that database specific implementations will extend.
 	*/
 	class HipsterSql{
 		protected $last_query;
@@ -15,7 +15,7 @@ namespace org\hrg\php_hipster_sql{
 
 		/* Last query that was executed. Usefull when troubleshooting */
 		public function last_query(){
-			if(is_array($this->last_query))
+			if($this->last_query instanceof Query)
 				return print_r($this->last_query,true)."\n".$this->build($this->last_query);
 		    return $this->last_query; 
 		}
@@ -28,6 +28,10 @@ namespace org\hrg\php_hipster_sql{
 
 		function quote($str){
 			return "'".$this->escape($str)."'";
+		}
+
+		function q($sql=null){
+			return new Query(func_num_args() != 1 ? func_get_args():$sql);
 		}
 
 		/* Sanitize a value and make it ready for concat*/
@@ -53,14 +57,19 @@ namespace org\hrg\php_hipster_sql{
 			if(func_num_args() >2 ) $arr = array_slice(func_get_args(),1) ;
 
 			$count = count($arr);
-			$ret = array();
+			$ret = new Query();
 			$first = true;
 
 			for($i=0; $i<$count; $i++){
-				if(!count($arr[$i])) continue;
+				if(!($arr[$i] instanceof Query)) throw new \Exception("only queries can be imploded");
+				if($arr[$i]->is_empty()) continue;
 
-				if(!$first) $this->_append($ret,$glue);
-				$this->_append($ret,$arr[$i]);
+				if($first)
+					$ret->append_one('');
+				else 
+					$ret->append_one($glue);
+				
+				$ret->append_one($arr[$i]);
 
 				$first = false;
 			}
@@ -79,7 +88,7 @@ namespace org\hrg\php_hipster_sql{
 				$ret[] = $arr[$i];
 			}
 
-			return $ret;
+			return new Query($ret);
 		}
 
 		/** Concatenate 2 or more queries. When concatenating 2 prepared statements (arrays in our case) we need to make sure that
@@ -88,123 +97,36 @@ namespace org\hrg\php_hipster_sql{
 		Also handles concating string queries with prepared statements (arrays). If singel argument is provided it is interpreted as
 		that argument contains an array with queries we want to concatenate */
 		final function concat($arr){
-			$ret = array();
-			return $this->_append_all( $ret, func_num_args() > 1 ?  func_get_args():$arr );
-		}
-
-		/** Append more queries to the existing one. Similar to concat, except it changes the firs array instead of returning new one.*/
-		final function append(&$left){
-			return $this->_append_all($left, array_slice(func_get_args(),1) );
-		}
-
-		function _append_all(&$left, $arr){
-			$count = count($arr);
-			for($i=0; $i<$count; $i++){
-				$this->_append($left, $arr[$i]);
-			}
-			return $left;
-		}
-
-		/** append value part to the query. */ 
-		function _append_value(&$left, $val){
-			if(is_array($val)){// if value is array, then it is actually a query that can be apended as usual
-				$this->append($left, $val);
-			}else{
-				$countLeft = count($left);	
-				if($countLeft %2 == 0){// last element is a value
-					// this usually should not happen, @TODO consider throwing an error
-					$left[] = '';
-				}
-				$left[] = $val;
-			}
-		}
-
-		function _append(&$left, $right){
-			if(!is_array($right)) $right = array($right);// less cases to handle :)
-
-			$countRight = count($right);
-			$countLeft = count($left);
-
-			$j = 0;
-			if($countLeft %2 == 1){// last element is a query string, so concat the last element from $left and first element from $right
-				$left[$countLeft-1] .= $right[0];
-				$j=1;// move index to 1 to skip that one as it is already added
-			}
-
-			for(;$j<$countRight; $j++){
-				$left[] = $right[$j];
-			}
-		}
-
-		/* Flatten the query so no nested arrays are left. The resulting array must produce same query as the input array
-		when build is called on it. This is utility to simplify generating prepared statements, as the preparing code does not have to vorry
-		about nested arrays.*/
-		function flatten($sql){
-			if(is_array($sql)){
-				$left = array();
-				$this->_flatten($left, $sql);
-				return $left;
-			}else
-				return $sql;
-		}
-
-		function _flatten(&$left, $right){
-			$countRight = count($right);
-			
-			for($i=0; $i<$countRight; $i++){
-				
-				$countLeft = count($left);
-				
-				if(is_array($right[$i])){
-					$this->_flatten($left, $right[$i]);
-				
-				}else if($i%2 == 0){// right: sql code
-					
-					if($countLeft %2 == 1 && $countLeft > 0){// left: sql code
-						$left[$countLeft-1] .= $right[$i];
-					}else{// left: variable
-						$left[] = $right[$i];
-					}
-
-				}else{// right: variable
-
-					if($countLeft %2 == 0){// last element is a value
-						// this usually should not happen, @TODO consider throwing an error
-						$left[] = '';
-					}
-					$left[] = $right[$i];
-				}
-
-			}
-
-			return $left;
+			$ret = new Query();
+			$ret->_append_all( func_num_args() > 1 ?  func_get_args():$arr );
+			return $ret;
 		}
 
 		function prepare($sql){
+			if(!(func_num_args() == 1 && $sql instanceof Query))
+				$sql = new Query(func_get_args());
 			$params = array();
-			
-			$sql = $this->flatten($sql);
 
-			if(is_array($sql) && count($sql>1)){
-				
-				$query = $sql[0];
-				$count = count($sql);
-				for($i=1; $i<$count; $i++){
-					if($i%2 == 0) 
-						$query .= $sql[$i];
-					else {
-						$query .= '?';
-						$params[] = $sql[$i];
-					}
+			$sql->flatten();
+
+			$arr = $sql->get_query_array();
+			$sql = $arr[0];
+			$count = count($arr);
+			for($i=1; $i<$count; $i++){
+				if($i%2 == 0) 
+					$sql .= $arr[$i];
+				else {
+					$sql .= '?';
+					$params[] = $arr[$i];
 				}
-			}else{
-				$query = $this->build($sql);
 			}
-			return array($query, $params);
+
+			return array($sql, $params);
 		}
 
 		function build($query){
 			if(func_num_args() > 1) $query = func_get_args();
+			if($query instanceof Query) $query = $query->get_query_array();
 
 			if(is_array($query)){
 				
@@ -219,9 +141,9 @@ namespace org\hrg\php_hipster_sql{
 					$queryPart = $query[$i];
 				
 					if($i%2 == 0) 
-						$ret .= $queryPart;
-					else if(is_array($queryPart))
-						$ret .= $this->build($queryPart);
+						$ret .= $queryPart; // all even index parts must be strings
+					else if($queryPart instanceof Query) // array instead of value is not allowed, as it would enable easy SQL injection 
+						$ret .= $this->build($queryPart->get_query_array());
 					else
 						$ret .= $this->q_value($queryPart);
 				}
@@ -232,8 +154,8 @@ namespace org\hrg\php_hipster_sql{
 		}
 
 		function build_where($op,$arr){
-			if(!count($arr)) return array();
-			return array('WHERE ', $this->implode(' '.$op.' ',$arr) );
+			if(!count($arr)) return new Query();
+			return new Query('WHERE ', $this->implode(' '.$op.' ',$arr) );
 		}
 
 		function build_where_and($arr){
@@ -245,13 +167,13 @@ namespace org\hrg\php_hipster_sql{
 		}
 
 		function build_and($arr){
-			if(!count($arr)) return array();
-			return array('( ', $this->implode(' AND ',$arr), ' )' );
+			if(!count($arr)) new Query();
+			return new Query('( ', $this->implode(' AND ',$arr), ' )' );
 		}
 
 		function build_or($arr){
-			if(!count($arr)) return array();
-			return array('( ', $this->implode(' OR ',$arr), ' )' );
+			if(!count($arr)) return new Query();
+			return new Query('( ', $this->implode(' OR ',$arr), ' )' );
 		}
 
 		function build_insert($tableName, $values){
@@ -268,7 +190,7 @@ namespace org\hrg\php_hipster_sql{
 
 			$v[] = ')';
 			array_unshift($v,$ret);
-			return $v;
+			return new Query($v);
 		}
 
 		/** generate update statement out of an array */
@@ -278,19 +200,23 @@ namespace org\hrg\php_hipster_sql{
 			$ret = array();
 			$delim = '';
 			foreach($values as $field=>$value){
-				if($delim){
-					$ret[] =$delim.$this->q_column($field).'=';
-				}else{
-					$ret[] = 'UPDATE '.$this->q_table($tableName).' SET '.$this->q_column($field).'=';
+				$ret[] =$delim.$this->q_column($field).'=';
+
+				if(!$delim){
+					// firts iteration we start the first part of the query with the first SET
+					$ret[0] = 'UPDATE '.$this->q_table($tableName).' SET '.$ret[0];
 				} 
 				
 				$ret[] = $value;
 				$delim = ', ';
 			}
+
+			$ret = new Query($ret);
+
 			// filter is not optional on purpose to avoid accidental update on whole table 
 			if($filter != 'all_rows'){
-				$ret[] = ' WHERE ';
-				$ret = $this->concat($ret, $filter);
+				$ret->append(' WHERE ');
+				$ret->append($filter);
 			}
 
 			return $ret;

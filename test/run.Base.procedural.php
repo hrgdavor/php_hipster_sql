@@ -1,6 +1,7 @@
 <?php
 require_once "simple_test.php";
 
+require_once "../src/Query.php";
 require_once "../src/HipsterSql.php";
 require_once "../src/hipster_sql.php";
 
@@ -51,28 +52,33 @@ assert_equal(
 
 /** TEST implode */
 assert_equal(
-	hip_build( hip_implode(' AND ', array(array('id=',1)) ) ),
+	hip_build( hip_implode(' AND ', array(hip_q('id=',1)) ) ),
 	'id=1'
 );
 
 assert_equal(
-	hip_build( hip_implode(' AND ', array(array('id=',1),array('date>',array('NOW()'))) ) ),
+	hip_build( hip_implode(' AND ', array(hip_q('id=',1),hip_q('date>',hip_q('NOW()'))) ) ),
 	'id=1 AND date>NOW()'
 );
 
 assert_equal(
-	count( hip_implode(' AND ', array(array()) ) ),
-	0
+	hip_build( hip_implode(' AND ', array(hip_q('id=',1),hip_q('date>','2016-01-01')) ) ),
+	'id=1 AND date>\'2016-01-01\''
 );
 
 assert_equal(
-	hip_build( hip_implode(' AND ', array(array()) ) ),
+	hip_implode(' AND ', array(hip_q()) )->is_empty() ,
+	true
+);
+
+assert_equal(
+	hip_build( hip_implode(' AND ', array(hip_q()) ) ),
 	''
 );
 
 /** TEST implode_values */
 assert_equal(
-	hip_implode_values(',', array(1,2,3) ),
+	hip_implode_values(',', array(1,2,3) )->get_query_array(),
 	array('',1,',',2,',',3)
 );
 
@@ -85,7 +91,7 @@ assert_equal(
 
 /** TEST flatten */
 assert_equal(
-	hip_flatten( array('WHERE id=', 1, ' AND pasword=', array('PASSWORD(','aaa',')') ) ),
+	hip_q( 'WHERE id=', 1, ' AND pasword=', hip_q('PASSWORD(','aaa',')') ) ->flatten()->get_query_array(),
 	array('WHERE id=', 1, ' AND pasword=PASSWORD(','aaa',')') 
 );
 
@@ -104,12 +110,13 @@ $userData = ['name'=>'John','email'=>'john@gmail.com'];
 
 $id = 1;
 $password = 'reek';
+
 assert_equal(
 	hip_build( hip_build_update('users',$userData, 'id=',$id) ),
 	"UPDATE \"users\" SET \"name\"='John', \"email\"='john@gmail.com' WHERE id=1"
 );
 
-$userData = ['name'=>'John','email'=>'john@gmail.com', 'password'=>array('PASSWORD(',$password,')') ];
+$userData = ['name'=>'John','email'=>'john@gmail.com', 'password'=>hip_q('PASSWORD(',$password,')') ];
 
 $id = 1;
 assert_equal(
