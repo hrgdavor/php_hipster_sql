@@ -12,12 +12,19 @@ namespace org\hrg\php_hipster_sql{
 
 		protected $columQuote1 = '"';
 		protected $columQuote2 = '"';
+		protected $throwError = false;
+
+		public function throw_error($val){
+			$this->throwError = $val;
+		}
 
 		/* Last query that was executed. Usefull when troubleshooting */
 		public function last_query(){
-			if($this->last_query instanceof Query)
-				return print_r($this->last_query,true)."\n".$this->build($this->last_query);
 		    return $this->last_query; 
+		}
+
+		public function last_query_str(){
+		    return $this->build($this->last_query);
 		}
 
 		/* Function that escapes string values for the #value function. Subclasses should override this
@@ -258,11 +265,47 @@ namespace org\hrg\php_hipster_sql{
 			return $rows;
 		}
 
-		function qdie($message){
-			echo 'ERROR: '.$message.'<br>'.$this->error().'<br>';
-			$this->close();
-			die();
+		function error_code(){ return 0;}
+		function error(){ return '';}
+
+		function getInfo(){
+			return array(
+				'code'=>$this->error_code(),
+				'error'=>$this->error(),
+				'last_query_str'=>$this->last_query_str(),
+				'last_query'=>$this->last_query()
+			);
 		}
+
+		function qdie($message){
+			if($this->throwError === 'die'){			
+				echo '<pre> ERROR: '.$message."\n[".$this->error_code().'] '.$this->error()."\n";
+				$info = $this->getInfo();
+				foreach($info as $key=>$val){
+					echo "<b>$key</b>\n";
+					print_r($val);
+					echo "\n\n";
+				}
+				$this->close();
+				die();
+			}else if($this->throwError === true){
+				throw new HipsterException($message, $this->getInfo());
+			}
+		}
+	}
+
+	class HipsterException extends \Exception{
+		protected $info;
+
+	    // Redefine the exception so message isn't optional
+	    public function __construct($message, $info, Exception $previous=null){
+	    	$this->info = $info;
+	        parent::__construct($message, $info['code'], $previous);
+	    }
+
+	    public function getInfo(){
+	    	return $this->info;
+	    }
 	}
 
 }

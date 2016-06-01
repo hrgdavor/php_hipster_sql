@@ -12,6 +12,10 @@ namespace org\hrg\php_hipster_sql{
 		  return $this->connection->error;
 		}
 
+		function error_code(){
+		  return $this->connection->errno;
+		}
+
 		public function escape($str){
 			return $this->connection->real_escape_string($str);
 		}
@@ -41,11 +45,12 @@ namespace org\hrg\php_hipster_sql{
 		function query($sql){
 			$this->close_result();
 
-			$query = $this->build(func_num_args() > 1 ? func_get_args():$sql);
-
+			$query = func_num_args() > 1 ? func_get_args():$sql;
 			$this->last_query = $query;
 
-			return ( $this->result = $this->connection->query($query) ) or $this->qdie('QUERY: '.$query);
+			$query = $this->build($query);
+
+			return ( $this->result = $this->connection->query($query) ) or $this->qdie('QUERY FAILED');
 		}
 
 		function fetch_assoc(){

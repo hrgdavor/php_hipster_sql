@@ -14,17 +14,29 @@ namespace org\hrg\php_hipster_sql{
 
 		function connect($host,$user,$pass,$db,$attr=array()){
 			if(!$attr[PDO::ATTR_DEFAULT_FETCH_MODE]) $attr[PDO::ATTR_DEFAULT_FETCH_MODE] = PDO::FETCH_ASSOC;
-			$this->connection =  new PDO(
-	    		$this->db_type.':host='.$host.';dbname='.$db,
-	    		$user,
-	    		$pass,
-	    		$attr
-			);
+			try{
+				$this->connection =  new PDO(
+		    		$this->db_type.':host='.$host.';dbname='.$db,
+		    		$user,
+		    		$pass,
+		    		$attr
+				);
+			} catch ( \PDOException $e){
+				$this->exception = $e;
+				$this->qdie('Error connecting to '.$db.'@'.$host.' as '.$user);
+			}
 		}
 
-		public function last_query(){
-			return parent::last_query()."\n".print_r($this->last_prepared,true);
+		public function last_prepared(){
+			return $this->last_prepared;
 		}
+
+		public function getInfo(){
+			$ret = parent::getInfo();
+			$ret['last_prepared'] = $this->last_prepared();
+			return $ret;
+		}
+
 
 		function quote($str){
 			return $this->connection->quote($str);
@@ -33,10 +45,23 @@ namespace org\hrg\php_hipster_sql{
 		function error(){
 			if($this->result)
 				$err = $this->result->errorInfo();
-			else
+			else if($this->connection)
 				$err = $this->connection->errorInfo();
+			else if($this->exception)
+				$err = $this->exception->getMessage();
 
 			if(is_array($err)) return $err[2];
+			return $err;
+		}
+
+		function error_code(){
+			if($this->result)
+				$err = $this->result->errorCode();
+			else if($this->connection)
+				$err = $this->connection->errorCode();
+			else if($this->exception)
+				$err = 1;// for now only when connecting
+
 			return $err;
 		}
 
@@ -63,8 +88,8 @@ namespace org\hrg\php_hipster_sql{
 			$this->last_prepared = array($query, $params);
 			
 
-			$this->result = $this->connection->prepare($query) or $this->qdie('QUERY: '.$this->last_query());
-			$this->result->execute($params) or $this->qdie('QUERY: '.$this->last_query());
+			$this->result = $this->connection->prepare($query) or $this->qdie('QUERY PREPARE FAILED');
+			$this->result->execute($params) or $this->qdie('QUERY FAILED');
 
 
 			return $this->result;

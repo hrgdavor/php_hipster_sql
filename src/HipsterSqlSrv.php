@@ -39,11 +39,12 @@ namespace org\hrg\php_hipster_sql{
 		function query($sql){
 			if($this->result) @sqlsrv_free_result($this->result);
 
-			$query = $this->build(func_num_args() > 1 ? func_get_args():$sql);
-
+			$query = func_num_args() > 1 ? func_get_args():$sql;
 			$this->last_query = $query;
 
-			return ($this->result = sqlsrv_query($query, $this->connection)) or $this->qdie('QUERY: '.$query);
+			$query = $this->build($query);
+
+			return ($this->result = sqlsrv_query($query, $this->connection)) or $this->qdie('QUERY FAILED ');
 		}
 
 		function fetch_assoc(){
