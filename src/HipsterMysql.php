@@ -14,7 +14,7 @@ namespace org\hrg\php_hipster_sql{
 		}
 
 		function error_code(){
-			mysql_errno($this->connection);
+			return mysql_errno($this->connection);
 		}
 
 		public function escape($str){

@@ -14,6 +14,10 @@ namespace org\hrg\php_hipster_sql{
 		protected $columQuote2 = '"';
 		protected $throwError = false;
 
+		public function set_connection($conn){
+			$this->connection = $conn;
+		}
+
 		public function throw_error($val){
 			$this->throwError = $val;
 		}
