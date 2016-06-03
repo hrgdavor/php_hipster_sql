@@ -31,8 +31,8 @@ namespace org\hrg\php_hipster_sql{
 			return $this->last_prepared;
 		}
 
-		public function getInfo(){
-			$ret = parent::getInfo();
+		public function get_info(){
+			$ret = parent::get_info();
 			$ret['last_prepared'] = $this->last_prepared();
 			return $ret;
 		}

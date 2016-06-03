@@ -6,8 +6,20 @@ namespace {
 		hip_get_db function must be declared that returns the current connection object;
 	*/
 
+	function hip_throw_error($val){
+	  return hip_get_db()->throw_error($val);
+	}
+
+	function hip_error_code(){
+	  return hip_get_db()->error_code();
+	}
+
 	function hip_error(){
 	  return hip_get_db()->error();
+	}
+
+	function hip_get_info(){
+	  return hip_get_db()->get_info();
 	}
 
 	function hip_last_query(){

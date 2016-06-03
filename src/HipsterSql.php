@@ -268,7 +268,7 @@ namespace org\hrg\php_hipster_sql{
 		function error_code(){ return 0;}
 		function error(){ return '';}
 
-		function getInfo(){
+		function get_info(){
 			return array(
 				'code'=>$this->error_code(),
 				'error'=>$this->error(),
@@ -280,7 +280,7 @@ namespace org\hrg\php_hipster_sql{
 		function qdie($message){
 			if($this->throwError === 'die'){			
 				echo '<pre> ERROR: '.$message."\n[".$this->error_code().'] '.$this->error()."\n";
-				$info = $this->getInfo();
+				$info = $this->get_info();
 				foreach($info as $key=>$val){
 					echo "<b>$key</b>\n";
 					print_r($val);
@@ -289,7 +289,7 @@ namespace org\hrg\php_hipster_sql{
 				$this->close();
 				die();
 			}else if($this->throwError === true){
-				throw new HipsterException($message, $this->getInfo());
+				throw new HipsterException($message, $this->get_info());
 			}
 		}
 	}
@@ -303,7 +303,7 @@ namespace org\hrg\php_hipster_sql{
 	        parent::__construct($message, $info['code'], $previous);
 	    }
 
-	    public function getInfo(){
+	    public function get_info(){
 	    	return $this->info;
 	    }
 	}
