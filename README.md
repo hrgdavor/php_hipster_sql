@@ -17,6 +17,11 @@ $DB->connect('host','username','pwd','dbname');
 function hip_get_db(){ global $DB; return $DB;} // this is required for procedural style (totally.* bundles)
 ```
 
+In case you are becoming a hipster gradually on an existing project, you can skip the `$DB->connect(...)` and use `$DB->set_connection($MyExistingConnection);` 
+just make sure the type of the existing connection matches the hipster class flavor. 
+There is no guarantee that this will not cause side effects, so it is up to you if you want to try the gradual transition instead going full hipster.
+
+
 ## Getting some data
 
 ```php
