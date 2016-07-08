@@ -19,6 +19,11 @@ assert_equal(
 	'select id,\'name\' from users where id=1'
 );
 
+assert_equal(
+	hip_build('select id,','name',' from users where birthday=','1990\\03\\05'),
+	'select id,\'name\' from users where birthday=\'1990\\\\03\\\\05\''
+);
+
 /** TEST concat */
 assert_equal(
 	hip_build(hip_concat('select id,name ','from users where id=1')),
