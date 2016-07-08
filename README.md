@@ -19,7 +19,7 @@ function hip_get_db(){ global $DB; return $DB;} // this is required for procedur
 
 In case you are becoming a hipster gradually on an existing project, you can skip the `$DB->connect(...)` and use `$DB->set_connection($MyExistingConnection);` 
 just make sure the type of the existing connection matches the hipster class flavor. 
-There is no guarantee that this will not cause side effects, so it is up to you if you want to try the gradual transition instead going full hipster.
+There is no guarantee that this will not cause side effects, so it is up to you if you want to try the gradual transition instead of going full hipster.
 
 
 ## Getting some data
