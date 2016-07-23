@@ -12,14 +12,16 @@ namespace org\hrg\php_hipster_sql{
 
 		protected $columQuote1 = '"';
 		protected $columQuote2 = '"';
-		protected $throwError = false;
+		protected $throwError = true;
 
 		public function set_connection($conn){
 			$this->connection = $conn;
 		}
 
 		public function throw_error($val){
+			$old = $this->throwError;
 			$this->throwError = $val;
+			return $old;
 		}
 
 		/* Last query that was executed. Usefull when troubleshooting */
@@ -147,16 +149,20 @@ namespace org\hrg\php_hipster_sql{
 
 				$ret = $query[0];
 
+				$evenOdd = 1;
 				for($i=1; $i<$count; $i++){
 				
 					$queryPart = $query[$i];
 				
-					if($i%2 == 0) 
-						$ret .= $queryPart; // all even index parts must be strings
-					else if($queryPart instanceof Query) // array instead of value is not allowed, as it would enable easy SQL injection 
+					if($queryPart instanceof Query){ // array instead of value is not allowed, as it would enable easy SQL injection 
 						$ret .= $this->build($queryPart->get_query_array());
+						$evenOdd = 1; // will be changed to 2 at the end of the loop.
+					}else if($evenOdd %2 == 0) 
+						$ret .= $queryPart; // all even index parts must be strings
 					else
 						$ret .= $this->q_value($queryPart);
+
+					$evenOdd++;
 				}
 				
 				return $ret;
@@ -281,15 +287,22 @@ namespace org\hrg\php_hipster_sql{
 			);
 		}
 
+		function get_info_str(){
+			$info = $this->get_info();
+			$str = "";
+			foreach($info as $key=>$val){
+				$str .= "<b>$key</b>\n";
+				$str .= print_r($val,true);
+				$str .= "\n";
+			}
+			return $str;
+		}
+
 		function qdie($message){
 			if($this->throwError === 'die'){			
-				echo '<pre> ERROR: '.$message."\n[".$this->error_code().'] '.$this->error()."\n";
-				$info = $this->get_info();
-				foreach($info as $key=>$val){
-					echo "<b>$key</b>\n";
-					print_r($val);
-					echo "\n\n";
-				}
+				echo '<pre> ERROR: '.$message."\n".
+					"[".$this->error_code().'] '.$this->error()."\n".
+					$this->get_info_str();
 				$this->close();
 				die();
 			}else if($this->throwError === true){
