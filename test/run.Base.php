@@ -129,5 +129,40 @@ assert_equal(
 	"UPDATE \"users\" SET \"name\"='John', \"email\"='john@gmail.com', \"password\"=PASSWORD('reek') WHERE id=1"
 );
 
+/*** TEST complicated append versions combined query parts with query objects between **/
+$q1 = $DB->q(" and user_id=",1);
+$q2 = $DB->q(" and is_deleted=",0);
+
+assert_equal(
+	$DB->build('select * from users WHERE 1=1', $q1, ' ORDER BY name'),
+	"select * from users WHERE 1=1 and user_id=1 ORDER BY name"
+);
+
+assert_equal(
+	$DB->build($DB->q('select * from users WHERE 1=1', $q1, ' ORDER BY name')->flatten()),
+	"select * from users WHERE 1=1 and user_id=1 ORDER BY name"
+);
+
+assert_equal(
+	$DB->build($DB->q()->append('select * from users WHERE 1=1', $q1, ' ORDER BY name')),
+	"select * from users WHERE 1=1 and user_id=1 ORDER BY name"
+);
+
+assert_equal(
+	$DB->build('select * from users WHERE 1=1', $q1, $q2, ' ORDER BY name'),
+	"select * from users WHERE 1=1 and user_id=1 and is_deleted=0 ORDER BY name"
+);
+
+assert_equal(
+	$DB->build($DB->q('select * from users WHERE 1=1', $q1, $q2, ' ORDER BY name')->flatten()),
+	"select * from users WHERE 1=1 and user_id=1 and is_deleted=0 ORDER BY name"
+);
+
+assert_equal(
+	$DB->build($DB->q()->append('select * from users WHERE 1=1', $q1, $q2, ' ORDER BY name')),
+	"select * from users WHERE 1=1 and user_id=1 and is_deleted=0 ORDER BY name"
+);
+
+
 echo "<b>Test success: $__TEST_COUNT</b>";	
 

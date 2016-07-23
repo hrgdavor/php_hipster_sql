@@ -22,6 +22,10 @@ namespace {
 	  return hip_get_db()->get_info();
 	}
 
+	function hip_get_info_str(){
+	  return hip_get_db()->get_info_str();
+	}
+
 	function hip_last_query(){
 	  return hip_get_db()->last_query();
 	}

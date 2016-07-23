@@ -4,6 +4,7 @@ namespace org\hrg\php_hipster_sql{
 
 	class Query{
 		protected $arr;
+		protected $prefix;
 
 		function __construct(){
 			$this->arr = $this->array_args(func_get_args());
@@ -12,6 +13,15 @@ namespace org\hrg\php_hipster_sql{
 
 		function get_query_array(){
 			return $this->arr;
+		}
+
+		function get_prefix(){
+			return $this->prefix;
+		}
+
+		function prefix($prefix){
+			$this->prefix = $prefix;
+			return $this;
 		}
 
 		// sanitize the argumets so methods can allow multiple variants
@@ -37,10 +47,11 @@ namespace org\hrg\php_hipster_sql{
 
 		/** Append more queries to the existing one. Similar to concat, except it changes the firs array instead of returning new one.*/
 		final function append($sql){
-			if(func_num_args() == 1) 
-				$this->_append($sql);
-			else 
-				$this->_append_all($this->array_args(func_get_args()));
+			$this->_append($this->array_args(func_get_args()));
+			// if(func_num_args() == 1) 
+			// 	$this->_append($sql);
+			// else 
+			// 	$this->_append_all($this->array_args(func_get_args()));
 			return $this;
 		}
 
@@ -78,7 +89,8 @@ namespace org\hrg\php_hipster_sql{
 			$countLeft = count($this->arr);
 
 			$j = 0;
-			if($countLeft %2 == 1){// last element is a query string, so concat the last element from $this->arr and first element from $right
+			if($countLeft %2 == 1 && !($this->arr[$countLeft-1] instanceof Query) && !($right[0] instanceof Query)){
+				// last element is a query string, so concat the last element from $this->arr and first element from $right
 				$this->arr[$countLeft-1] .= $right[0];
 				$j=1;// move index to 1 to skip that one as it is already added
 			}
@@ -101,15 +113,15 @@ namespace org\hrg\php_hipster_sql{
 
 		function _flatten(&$left, $right){
 			$countRight = count($right);
-			
+			$evenOdd = 0;
 			for($i=0; $i<$countRight; $i++){
 				
 				$countLeft = count($left);
 				
 				if($right[$i] instanceof Query){
 					$this->_flatten($left, $right[$i]->arr);
-				
-				}else if($i%2 == 0){// right: even: sql code
+					$evenOdd = 1; // will be changed to 2 at the end of the loop
+				}else if($evenOdd%2 == 0){// right: even: sql code
 					
 					if($countLeft %2 == 1 && $countLeft > 0){// left: even: sql code
 						$left[$countLeft-1] .= $right[$i];
@@ -125,7 +137,7 @@ namespace org\hrg\php_hipster_sql{
 					}
 					$left[] = $right[$i];
 				}
-
+				$evenOdd++;
 			}
 
 			return $left;
