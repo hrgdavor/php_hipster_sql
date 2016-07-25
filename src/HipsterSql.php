@@ -242,38 +242,69 @@ namespace org\hrg\php_hipster_sql{
 
 		/** Utility function that can be called for each row to fill the map with values.
 			The map is deep #columns-1 and the last column contains leaf values. */
-		protected function map_fill(&$rows,&$row,$i){
-			if($i>=count($row)-2) $rows[$row[$i]] = $row[$i+1];
-			else $this->map_fill($rows[$row[$i]], $row,$i+1);
+		protected function map_fill(&$map,&$row,$i){
+			if($i>=count($row)-2) $map[$row[$i]] = $row[$i+1];
+			else $this->map_fill($map[$row[$i]], $row,$i+1);
 		}
 
 		/** Utility function that can be called for each row to fill the map with values. 
 			The map is deep #columns-1 and the last column contains leaf values.
 			Expects each leaf to possibly have more than one element, so leafs are arrays. */
-		protected function map_list_fill(&$rows,&$row,$i){
-			if($i>=count($row)-2) $rows[$row[$i]][] = $row[$i+1];
-			else $this->map_list_fill($rows[$row[$i]], $row,$i+1);
+		protected function map_list_fill(&$map,&$row,$i){
+			if($i>=count($row)-2) $map[$row[$i]][] = $row[$i+1];
+			else $this->map_list_fill($map[$row[$i]], $row,$i+1);
 		}
 
 		/* Multi-level map fill utility function. Each leaf is a row  */
-		protected function map_assoc_fill(&$rows,&$row,$column,$i){
-			if($i>=count($column)-1) $rows[$row[$column[$i]]] = $row;
-			else $this->map_assoc_fill($rows[$row[$column[$i]]], $row,$column,$i+1);
+		protected function map_assoc_fill(&$map,&$row,$column,$i){
+			if($i>=count($column)-1) $map[$row[$column[$i]]] = $row;
+			else $this->map_assoc_fill($map[$row[$column[$i]]], $row,$column,$i+1);
 		}
 
 		/* Multi-level map fill utility function. (leafs are arrays) */
-		protected function map_assoc_fill_list(&$rows,&$row,$column,$i){
-			if($i>=count($column)-1) $rows[$row[$column[$i]]][] = $row;
-			else $this->map_assoc_fill_list($rows[$row[$column[$i]]], $row,$column,$i+1);
+		protected function map_assoc_list_fill(&$map,&$row,$column,$i){
+			if($i>=count($column)-1) $map[$row[$column[$i]]][] = $row;
+			else $this->map_assoc_fill_list($map[$row[$column[$i]]], $row,$column,$i+1);
 		}
 
-		function make_map($arr){
-			$rows = array();
-			foreach($arr as $row){
-				_sql_map_fill($rows,$row, 0);
+		function get_column($rows,$column){
+			$colData = array();
+			foreach($rows as $row){
+				$colData[] = $row[$column];
 			}
-			return $rows;
+			return $colData;
 		}
+
+		function map($rows,$column=null){
+			if($column && !is_array($column)) $column = array($column);
+			
+			$map = array();
+			
+			foreach($rows as $row){
+				if($column)
+					$this->map_assoc_fill($map,$row,$column,0);
+				else
+					$this->map_fill($map,$row, 0);
+			}
+
+			return $map;
+		}
+
+		function map_list($rows,$column=null){
+			if($column && !is_array($column)) $column = array($column);
+			
+			$map = array();
+			
+			foreach($rows as $row){
+				if($column)
+					$this->map_assoc_list_fill($map,$row,$column, 0);
+				else
+					$this->map_list_fill($map,$row, 0);
+			}
+			
+			return $map;
+		}
+
 
 		function error_code(){ return 0;}
 		function error(){ return '';}
