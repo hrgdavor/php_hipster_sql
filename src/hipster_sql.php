@@ -146,16 +146,4 @@ namespace {
 		return hip_get_db()->one(func_num_args() > 1 ? func_get_args():$sql);
 	}
 
-	function hip_map($rows,$column=null){
-		return hip_get_db()->map($rows,$column);
-	}
-
-	function hip_map_list($rows,$column=null){
-		return hip_get_db()->map_list($rows,$column);
-	}
-
-	function hip_get_column($rows,$column){
-		return hip_get_db()->get_column($rows,$column);
-	}
-
 }

@@ -7,6 +7,7 @@ if(!file_exists($out_dir)){
 	mkdir($out_dir);
 }
 
+$req['hipster_sql.php']  = array('hipster_map.php');
 $req['HipsterSql.php']  = array('Query.php');
 // dependencies
 $req['HipsterMysql.php']  = array('HipsterSql.php');
