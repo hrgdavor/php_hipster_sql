@@ -66,7 +66,7 @@ namespace org\hrg\php_hipster_sql{
 			return $this->columQuote1.$this->escape($str).$this->columQuote2;
 		}
 
-		final function implode($glue, $arr){
+		final function implode($glue, $arr, $prefix='', $suffix=''){
 			if(func_num_args() >2 ) $arr = array_slice(func_get_args(),1) ;
 
 			$count = count($arr);
@@ -78,7 +78,7 @@ namespace org\hrg\php_hipster_sql{
 				if($arr[$i]->is_empty()) continue;
 
 				if($first)
-					$ret->append_one('');
+					$ret->append_one($prefix);
 				else 
 					$ret->append_one($glue);
 				
@@ -86,22 +86,26 @@ namespace org\hrg\php_hipster_sql{
 
 				$first = false;
 			}
+			if($suffix) $ret->append_one($suffix);
 
 			return $ret;
 		}
 
-		final function implode_values($glue, $arr){
+		final function implode_values($glue, $arr, $prefix='', $suffix=''){
 			if(func_num_args() >2 ) $arr = array_slice(func_get_args(),1) ;
 
 			$count = count($arr);
-			$ret = array('');
+			$ret = array($prefix);
 
 			for($i=0; $i<$count; $i++){
 				if($i>0) $ret[] = $glue;
 				$ret[] = $arr[$i];
 			}
+			
+			$ret = new Query($ret);
+			if($suffix) $ret->append_one($suffix);
 
-			return new Query($ret);
+			return $ret;
 		}
 
 		/** Concatenate 2 or more queries. When concatenating 2 prepared statements (arrays in our case) we need to make sure that
