@@ -4,7 +4,6 @@ namespace org\hrg\php_hipster_sql{
 
 	class Query{
 		protected $arr;
-		protected $prefix;
 
 		function __construct(){
 			$this->arr = $this->array_args(func_get_args());
@@ -13,15 +12,6 @@ namespace org\hrg\php_hipster_sql{
 
 		function get_query_array(){
 			return $this->arr;
-		}
-
-		function get_prefix(){
-			return $this->prefix;
-		}
-
-		function prefix($prefix){
-			$this->prefix = $prefix;
-			return $this;
 		}
 
 		// sanitize the argumets so methods can allow multiple variants
