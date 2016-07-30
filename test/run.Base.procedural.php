@@ -81,6 +81,12 @@ assert_equal(
 	''
 );
 
+$array = array(hip_q('id=',1),hip_q('date>','2016-01-01'));
+assert_equal(
+	hip_build( hip_implode('WHERE ',' AND ', $array,' AND 1=1') ),
+	'WHERE id=1 AND date>\'2016-01-01\' AND 1=1'
+);
+
 /** TEST implode_values */
 assert_equal(
 	hip_implode_values(',', array(1,2,3) )->get_query_array(),
@@ -93,6 +99,11 @@ assert_equal(
 	"id IN (1,2,3)"
 );
 
+$array = array(1,2,3);
+assert_equal(
+	hip_build( hip_implode_values('id IN (',',', $array, ')') ),
+	"id IN (1,2,3)"
+);
 
 /** TEST flatten */
 assert_equal(

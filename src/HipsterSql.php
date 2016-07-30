@@ -49,7 +49,6 @@ namespace org\hrg\php_hipster_sql{
 
 		/* Sanitize a value and make it ready for concat*/
 		function q_value($str){
-			if( is_object($str) && get_class($str) == "sql_literal") return $str->value;
 			if( $str === "NULL" || is_null($str) ) return "NULL";
 			if(is_numeric($str) && $str[0] != "0" && $str[0] != "+") return $str;//nubers that have consistent representation
 			return $this->quote($str);
@@ -66,9 +65,17 @@ namespace org\hrg\php_hipster_sql{
 			return $this->columQuote1.$this->escape($str).$this->columQuote2;
 		}
 
+		/* Three different variants of paramters
+		   $glue,$arr
+		   $prefix,$glue,$arr
+		   $prefix,$glue,$arr,$suffix
+		*/
 		final function implode($glue, $arr, $prefix='', $suffix=''){
-			if(func_num_args() >2 ) $arr = array_slice(func_get_args(),1) ;
-
+			if(func_num_args()>2 && $prefix !==''){
+				$glue = $arr; // arg1
+				$arr = $prefix; // arg2
+				$prefix = func_get_arg(0);
+			}
 			$count = count($arr);
 			$ret = new Query();
 			$first = true;
@@ -91,8 +98,17 @@ namespace org\hrg\php_hipster_sql{
 			return $ret;
 		}
 
+		/* Three different variants of paramters
+		   $glue,$arr
+		   $prefix,$glue,$arr
+		   $prefix,$glue,$arr,$suffix
+		*/
 		final function implode_values($glue, $arr, $prefix='', $suffix=''){
-			if(func_num_args() >2 ) $arr = array_slice(func_get_args(),1) ;
+			if(func_num_args()>2 && $prefix !==''){
+				$glue = $arr; // arg1
+				$arr = $prefix; // arg2
+				$prefix = func_get_arg(0);
+			}
 
 			$count = count($arr);
 			$ret = array($prefix);
@@ -151,7 +167,7 @@ namespace org\hrg\php_hipster_sql{
 				if($count == 0) return '';
 				if($count == 1) return $this->build($query[0]);
 
-				$ret = $query[0];
+				$ret = $query[0] instanceof Query ? '':$query[0];
 
 				$evenOdd = 1;
 				for($i=1; $i<$count; $i++){
@@ -163,8 +179,9 @@ namespace org\hrg\php_hipster_sql{
 						$evenOdd = 1; // will be changed to 2 at the end of the loop.
 					}else if($evenOdd %2 == 0) 
 						$ret .= $queryPart; // all even index parts must be strings
-					else
+					else{
 						$ret .= $this->q_value($queryPart);
+					}
 
 					$evenOdd++;
 				}
@@ -172,29 +189,6 @@ namespace org\hrg\php_hipster_sql{
 				return $ret;
 			}
 			return $query;
-		}
-
-		function build_where($op,$arr){
-			if(!count($arr)) return new Query();
-			return new Query('WHERE ', $this->implode(' '.$op.' ',$arr) );
-		}
-
-		function build_where_and($arr){
-			return $this->build_where('AND',$arr);
-		}
-
-		function build_where_or($arr){
-			return $this->build_where('OR',$arr);
-		}
-
-		function build_and($arr){
-			if(!count($arr)) new Query();
-			return new Query('( ', $this->implode(' AND ',$arr), ' )' );
-		}
-
-		function build_or($arr){
-			if(!count($arr)) return new Query();
-			return new Query('( ', $this->implode(' OR ',$arr), ' )' );
 		}
 
 		function build_insert($tableName, $values){

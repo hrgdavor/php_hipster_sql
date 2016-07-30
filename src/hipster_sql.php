@@ -54,14 +54,12 @@ namespace {
 		return hip_get_db()->concat(func_num_args() > 1 ? func_get_args():$arr );
 	}
 
-	function hip_implode($glue, $arr){
-		if(func_num_args() >2 ) $arr = array_slice(func_get_args(),1) ;
-		return hip_get_db()->implode( $glue, $arr );
+	function hip_implode($glue, $arr, $prefix='', $suffix=''){
+		return hip_get_db()->implode($glue, $arr, $prefix, $suffix);
 	}
 
-	function hip_implode_values($glue, $arr){
-		if(func_num_args() >2 ) $arr = array_slice(func_get_args(),1) ;
-		return hip_get_db()->implode_values( $glue, $arr );
+	function hip_implode_values($glue, $arr, $prefix='', $suffix=''){
+		return hip_get_db()->implode_values($glue, $arr, $prefix, $suffix);
 	}
 
 	function hip_prepare($sql){
@@ -70,26 +68,6 @@ namespace {
 
 	function hip_build($sql){
 		return hip_get_db()->build(func_num_args() > 1 ? func_get_args():$sql);
-	}
-
-	function hip_build_where($op,$arr){
-		return hip_get_db()->build_where($op,$arr);
-	}
-
-	function hip_build_where_and($arr){
-		return hip_get_db()->build_where_and($arr);
-	}
-
-	function hip_build_where_or($arr){
-		return hip_get_db()->build_where_or($arr);
-	}
-
-	function hip_build_and($arr){
-		return hip_get_db()->build_and($arr);
-	}
-
-	function hip_build_or($arr){
-		return hip_get_db()->build_or($arr);
 	}
 
 	function hip_build_insert($tableName, $values){
