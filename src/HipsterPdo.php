@@ -13,7 +13,7 @@ namespace org\hrg\php_hipster_sql{
 		}
 
 		function connect($host,$user,$pass,$db,$attr=array()){
-			if(!$attr[PDO::ATTR_DEFAULT_FETCH_MODE]) $attr[PDO::ATTR_DEFAULT_FETCH_MODE] = PDO::FETCH_ASSOC;
+			if(!array_key_exists(\PDO::ATTR_DEFAULT_FETCH_MODE, $attr)) $attr[\PDO::ATTR_DEFAULT_FETCH_MODE] = \PDO::FETCH_ASSOC;
 			try{
 				$this->connection =  new PDO(
 		    		$this->db_type.':host='.$host.';dbname='.$db,
