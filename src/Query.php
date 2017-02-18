@@ -93,7 +93,7 @@ namespace org\hrg\php_hipster_sql{
 		/* 
 		Flatten the query so no nested Query objects are left. 
 		The resulting Query must produce same sql as the input Query when build is called on it. 
-		This is utility to simplify generating prepared statements, as the preparing code does not have to vorry about nested arrays.
+		This is utility to simplify generating prepared statements, as the preparing code does not have to vorry about nested queries.
 		*/
 		function flatten(){
 			$left = array();

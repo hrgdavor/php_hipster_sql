@@ -124,17 +124,6 @@ namespace org\hrg\php_hipster_sql{
 			return $ret;
 		}
 
-		/** Concatenate 2 or more queries. When concatenating 2 prepared statements (arrays in our case) we need to make sure that
-		the resulting array maintains the requirement for the prepared statement arrays. The requirement is that variables must
-		be at odd indices in the array. Simply appending the arrays can result in malformed array. <br>
-		Also handles concating string queries with prepared statements (arrays). If singel argument is provided it is interpreted as
-		that argument contains an array with queries we want to concatenate */
-		final function concat($arr){
-			$ret = new Query();
-			$ret->_append_all( func_num_args() > 1 ?  func_get_args():$arr );
-			return $ret;
-		}
-
 		function prepare($sql){
 			if(!(func_num_args() == 1 && $sql instanceof Query))
 				$sql = new Query(func_get_args());

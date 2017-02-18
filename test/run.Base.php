@@ -24,36 +24,6 @@ assert_equal(
 	'select id,\'name\' from users where birthday=\'1990\\\\03\\\\05\''
 );
 
-/** TEST concat */
-assert_equal(
-	$DB->build($DB->concat('select id,name ','from users where id=1')),
-	'select id,name from users where id=1'
-);
-
-assert_equal(
-	$DB->build($DB->concat(array('select id,name '),array('from users where id=1'))),
-	'select id,name from users where id=1'
-);
-
-assert_equal(
-	$DB->build($DB->concat(array('select id,','name',' '),array('from users where id=1'))),
-	'select id,\'name\' from users where id=1'
-);
-
-assert_equal(
-	$DB->build($DB->concat(array('select id,','name'),' from users where id=1')),
-	'select id,\'name\' from users where id=1'
-);
-
-assert_equal(
-	$DB->build($DB->concat(array('select id,','name',' '),array('from users where id=',1))),
-	'select id,\'name\' from users where id=1'
-);
-
-assert_equal(
-	$DB->build($DB->concat(array('select id,','name',' '),array('from users where id=','1a'))),
-	'select id,\'name\' from users where id=\'1a\''
-);
 
 /** TEST implode */
 assert_equal(

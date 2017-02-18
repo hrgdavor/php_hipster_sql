@@ -50,10 +50,6 @@ namespace {
 		return hip_get_db()->q_value($str);
 	}
 
-	function hip_concat($arr){
-		return hip_get_db()->concat(func_num_args() > 1 ? func_get_args():$arr );
-	}
-
 	function hip_implode($glue, $arr, $prefix='', $suffix=''){
 		return hip_get_db()->implode($glue, $arr, $prefix, $suffix);
 	}

@@ -1,2 +1,3 @@
 php_hipster_sql.sublime-workspace
 build/*.php
+test/test.php
