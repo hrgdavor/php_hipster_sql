@@ -238,15 +238,23 @@ namespace org\hrg\php_hipster_sql{
 			);
 		}
 
-		function get_info_str(){
+		function get_info_str($html=false){
 			$info = $this->get_info();
-			$str = "";
-			foreach($info as $key=>$val){
-				$str .= "<b>$key</b>\n";
-				$str .= print_r($val,true);
-				$str .= "\n";
+
+			if($html){
+				$str = "<pre>\n";
+				foreach($info as $key=>$val){
+					$str .= "<b>$key</b>\n<div style=\"padding-left: 16px\">";
+					$str .= htmlspecialchars(print_r($val,true));
+					$str .= "</div>\n";
+				}
+				$str .= "</pre>\n";
+				return $str;
+
+			}else{
+				return print_r($info,true);
 			}
-			return $str;
+			
 		}
 
 		function qdie($message){

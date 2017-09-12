@@ -133,7 +133,8 @@ namespace org\hrg\php_hipster_sql{
 
 			if($limit == 0) return $this->rows($sql);
 			// DIRTY FIX STUPID PDO.. PDO treats parameters as strings, so create the string our selves, instead of using parameters 
-			$sqlWithLimit = new Query($sql)->append(' LIMIT '. ($limit+0) .' OFFSET '. ($from+0));
+			$sqlWithLimit = new Query($sql);
+			$sqlWithLimit->append(' LIMIT '. ($limit+0) .' OFFSET '. ($from+0));
 			return $this->rows($sqlWithLimit);
 		}
 

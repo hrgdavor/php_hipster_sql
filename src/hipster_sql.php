@@ -22,8 +22,8 @@ namespace {
 	  return hip_get_db()->get_info();
 	}
 
-	function hip_get_info_str(){
-	  return hip_get_db()->get_info_str();
+	function hip_get_info_str($html=false){
+	  return hip_get_db()->get_info_str($html);
 	}
 
 	function hip_last_query(){
