@@ -32,7 +32,7 @@ array("SELECT * from user WHERE username=" , $username , " AND is_deleted=" , $d
 
 # The principle
 
-__Odd elements are values that need quoting.__ _(if value is array, it is treated as a query recursively)_
+__Odd elements are values that need quoting.__ _( value can be a query which will be later then expaneded before executing)_
 
 The idea comes from making a classic case of concatenating static query parts and values into a query string.
 
