@@ -230,17 +230,23 @@ namespace org\hrg\php_hipster_sql{
 		function error(){ return '';}
 
 		function get_info(){
-			return array(
+			$last_query = $this->last_query();
+			if($last_query && $last_query instanceof Query) $last_query = $last_query->get_arr();
+
+			$ret = array(
 				'code'=>$this->error_code(),
-				'error'=>$this->error(),
 				'last_query_str'=>$this->last_query_str(),
-				'last_query'=>$this->last_query()
+				'last_query'=>$last_query
 			);
+			$error = $this->error();
+			if($error){
+				$ret['error'] = $error;
+			}
+			return $ret;
 		}
 
 		function get_info_str($html=false){
 			$info = $this->get_info();
-
 			if($html){
 				$str = "<pre>\n";
 				foreach($info as $key=>$val){

@@ -133,6 +133,10 @@ namespace org\hrg\php_hipster_sql{
 			return $left;
 		}
 
+		function get_arr(){
+			return $this->arr;
+		}
 	}
+
 
 }
