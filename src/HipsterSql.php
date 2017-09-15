@@ -47,6 +47,10 @@ namespace org\hrg\php_hipster_sql{
 			return new Query(func_num_args() != 1 ? func_get_args():$sql);
 		}
 
+		function prepare($sql=null){
+			return new Prepared(func_num_args() == 1 ? $sql:func_get_args());
+		}
+
 		/* Sanitize a value and make it ready for concat*/
 		function q_value($str){
 			if( $str === "NULL" || is_null($str) ) return "NULL";
@@ -122,28 +126,6 @@ namespace org\hrg\php_hipster_sql{
 			if($suffix) $ret->append_one($suffix);
 
 			return $ret;
-		}
-
-		function prepare($sql){
-			if(!(func_num_args() == 1 && $sql instanceof Query))
-				$sql = new Query(func_get_args());
-			$params = array();
-
-			$sql->flatten();
-
-			$arr = $sql->get_query_array();
-			$sql = $arr[0];
-			$count = count($arr);
-			for($i=1; $i<$count; $i++){
-				if($i%2 == 0) 
-					$sql .= $arr[$i];
-				else {
-					$sql .= '?';
-					$params[] = $arr[$i];
-				}
-			}
-
-			return array($sql, $params);
 		}
 
 		function build($query){
@@ -283,7 +265,7 @@ namespace org\hrg\php_hipster_sql{
 	    public function __construct($message, $info, Exception $previous=null){
 	    	$this->info = $info;
 	    	if($info['last_query_str']) $message .= ". Last query: ".$info['last_query_str'];
-	        parent::__construct($message, $info['code'], $previous);
+	        parent::__construct($message, 0, $previous);
 	    }
 
 	    public function get_info(){

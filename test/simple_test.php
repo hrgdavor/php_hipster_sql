@@ -6,7 +6,7 @@ function assert_equal($real, $expected){ global $__TEST_COUNT;
 	$json_expected = json_encode($expected);
 	if( $json_real != $json_expected){
 		echo "<pre>Test failed:\n Value:\n$json_real\nExpected:\n$json_expected\n\n";
-		print_r(debug_backtrace());
+		debug_print_backtrace();
 		die();
 	}
 	$__TEST_COUNT++;

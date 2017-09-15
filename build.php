@@ -1,14 +1,14 @@
 <?
 $src_dir = dirname(__FILE__).'/src';
 $out_dir = dirname(__FILE__).'/build';
-$version = "0.2.0";
+$version = "0.2.1";
 
 if(!file_exists($out_dir)){
 	mkdir($out_dir);
 }
 
 $req['hipster_sql.php']  = array('hipster_map.php');
-$req['HipsterSql.php']  = array('Query.php');
+$req['HipsterSql.php']  = array('Prepared.php','Query.php');
 // dependencies
 $req['HipsterMysql.php']  = array('HipsterSql.php');
 $req['HipsterMysqli.php'] = array('HipsterSql.php');

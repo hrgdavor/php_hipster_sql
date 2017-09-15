@@ -90,6 +90,30 @@ namespace org\hrg\php_hipster_sql{
 			}
 		}
 
+		function prepare(){
+			$params = array();
+
+			$arr = array();
+			$this->_flatten($arr, $this->arr);
+
+			$sql = $arr[0];
+			
+			$count = count($arr);
+
+			for($i=1; $i<$count; $i++){
+				if($i%2 == 0) 
+					$sql .= $arr[$i];
+				else {
+					$sql .= '?';
+					$params[] = $arr[$i];
+				}
+			}
+
+			$prep = new Prepared();
+			$prep->append_array($sql, $params);
+			return $prep;
+		}
+
 		/* 
 		Flatten the query so no nested Query objects are left. 
 		The resulting Query must produce same sql as the input Query when build is called on it. 

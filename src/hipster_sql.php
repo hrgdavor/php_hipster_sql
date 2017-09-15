@@ -38,6 +38,10 @@ namespace {
 		return hip_get_db()->q(func_num_args() == 1 ? $sql:func_get_args());
 	}	
 
+	function hip_prepare($sql){
+		return new org\hrg\php_hipster_sql\Prepared(func_num_args() == 1 ? $sql:func_get_args());
+	}	
+
 	function hip_q_column($str){
 		return hip_get_db()->q_column($str);
 	}
@@ -56,10 +60,6 @@ namespace {
 
 	function hip_implode_values($glue, $arr, $prefix='', $suffix=''){
 		return hip_get_db()->implode_values($glue, $arr, $prefix, $suffix);
-	}
-
-	function hip_prepare($sql){
-		return hip_get_db()->prepare(func_num_args() > 1 ?  func_get_args():$sql);
 	}
 
 	function hip_build($sql){

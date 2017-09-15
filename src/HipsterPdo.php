@@ -82,14 +82,16 @@ namespace org\hrg\php_hipster_sql{
 
 			if(func_num_args() > 1) $sql = func_get_args();
 			
-			$this->last_query = $sql;
-			list($query, $params) = $this->prepare($sql);
-
-			$this->last_prepared = array($query, $params);
+			if(!($sql instanceof Query)) $sql = new Query($sql);
 			
+			$this->last_query = $sql;
+			
+			$prepared = $sql->prepare();
 
-			$this->result = $this->connection->prepare($query) or $this->qdie('QUERY PREPARE FAILED');
-			$this->result->execute($params) or $this->qdie('QUERY FAILED');
+			$this->last_prepared = array($prepared->get_sql(), $prepared->get_args());
+
+			$this->result = $this->connection->prepare($prepared->get_sql()) or $this->qdie('QUERY PREPARE FAILED');
+			$this->result->execute($prepared->get_args()) or $this->qdie('QUERY FAILED');
 
 
 			return $this->result;

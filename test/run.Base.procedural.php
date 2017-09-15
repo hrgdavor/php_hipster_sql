@@ -1,6 +1,7 @@
 <?php
 require_once "simple_test.php";
 
+require_once "../src/Prepared.php";
 require_once "../src/Query.php";
 require_once "../src/HipsterSql.php";
 require_once "../src/hipster_sql.php";
@@ -8,6 +9,16 @@ require_once "../src/hipster_sql.php";
 $DB = new org\hrg\php_hipster_sql\HipsterSql();
 
 function hip_get_db(){ global $DB; return $DB;} // required for procedural style
+
+assert_equal(
+	new org\hrg\php_hipster_sql\Prepared('select id,name from users where id=?',1),
+	array('sql'=>'select id,name from users where id=?','args'=>array(1))
+);
+
+assert_equal(
+	hip_prepare('select id,name from users where id=?',1),
+	array('sql'=>'select id,name from users where id=?','args'=>array(1))
+);
 
 assert_equal(
 	hip_build('select id,name from users where id=',1),
@@ -83,13 +94,13 @@ assert_equal(
 
 /** TEST prepare */
 assert_equal(
-	hip_prepare( array('WHERE id=', 1 ) ),
-	array('WHERE id=?',array(1))
+	hip_q( array('WHERE id=', 1 ) )->prepare(),
+	array('sql'=>'WHERE id=?','args'=>array(1))
 );
 
 assert_equal(
-	hip_prepare( array('WHERE id=', 1, ' AND is_deleted=',0 ) ),
-	array('WHERE id=? AND is_deleted=?',array(1,0))
+	hip_q( array('WHERE id=', 1, ' AND is_deleted=',0 ) )->prepare(),
+	array('sql'=>'WHERE id=? AND is_deleted=?','args'=>array(1,0))
 );
 
 $userData = ['name'=>'John','email'=>'john@gmail.com'];

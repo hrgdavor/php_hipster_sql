@@ -17,11 +17,6 @@ $DB->connect('host','username','pwd','dbname');
 function hip_get_db(){ global $DB; return $DB;} // this is required for procedural style (totally.* bundles)
 ```
 
-In case you are becoming a hipster gradually on an existing project, you can skip the `$DB->connect(...)` and use `$DB->set_connection($MyExistingConnection);` 
-just make sure the type of the existing connection matches the hipster class flavor. 
-There is no guarantee that this will not cause side effects, so it is up to you if you want to try the gradual transition instead of going full hipster.
-
-
 ## Getting some data
 
 ```php
@@ -48,7 +43,7 @@ You get automatic value quoting and safety from SQL injection for free. Read mor
 
 To get a quick idea, read the rest of this section.
 
-The simplest way I made my pages vulnerable to SQL injections was this (simple fix example included):
+The simplest way one can make pages vulnerable to SQL injections is this (simple fix example included):
 ```php
 // unsafe
 $result = mysql_query("SELECT * from article WHERE id=" . $_GET['id']);
@@ -62,7 +57,19 @@ $row = hip_row("SELECT * from article WHERE id=" , $_GET['id']);
 
 ```
 
-[rad more](doc/array_queries.md) about array queries.
+As you can see, making the queries is very simple, but keep in mind that this subtle difference also
+means it is easy to overlook the unsafe code, so be dilligent. [rad more](doc/array_queries.md) about variable parameter queries.
+
+## migration
+In case you are becoming a hipster gradually :) 
+
+In an existing project you can skip the `$DB->connect(...)` and reuse an existing connection form the library that you are
+currently using. Just call `$DB->set_connection($MyExistingConnection);` with your existing conenction reference and
+make sure the type of the existing connection matches the hipster class flavor that you are using. 
+
+There is no guarantee that this will not cause side effects, so it is up to you if you want to try the gradual transition instead of going full hipster.
+
+
 
 ## 99%+
  - 99% of times you only need one connection to the database. ( more: multiple connections )
