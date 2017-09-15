@@ -231,7 +231,7 @@ namespace org\hrg\php_hipster_sql{
 
 		function get_info(){
 			$last_query = $this->last_query();
-			if($last_query && $last_query instanceof Query) $last_query = $last_query->get_arr();
+			if($last_query && $last_query instanceof Query) $last_query = $last_query->get_query_array();
 
 			$ret = array(
 				'code'=>$this->error_code(),
@@ -264,14 +264,14 @@ namespace org\hrg\php_hipster_sql{
 		}
 
 		function qdie($message){
+			$err_info = "[".$this->error_code().'] '.$this->error();
 			if($this->throwError === 'die'){			
-				echo '<pre> ERROR: '.$message."\n".
-					"[".$this->error_code().'] '.$this->error()."\n".
-					$this->get_info_str();
+				echo '<pre> ERROR: '.$message."\n".$err_info."\n".$this->get_info_str();
+				debug_print_backtrace();
 				$this->close();
 				die();
 			}else if($this->throwError === true){
-				throw new HipsterException($message, $this->get_info());
+				throw new HipsterException($message.' '.$err_info, $this->get_info());
 			}
 		}
 	}
@@ -282,6 +282,7 @@ namespace org\hrg\php_hipster_sql{
 	    // Redefine the exception so message isn't optional
 	    public function __construct($message, $info, Exception $previous=null){
 	    	$this->info = $info;
+	    	if($info['last_query_str']) $message .= ". Last query: ".$info['last_query_str'];
 	        parent::__construct($message, $info['code'], $previous);
 	    }
 

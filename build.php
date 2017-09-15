@@ -1,6 +1,6 @@
 <?
-$src_dir = 'src';
-$out_dir = 'build';
+$src_dir = dirname(__FILE__).'/src';
+$out_dir = dirname(__FILE__).'/build';
 $version = "0.2.0";
 
 if(!file_exists($out_dir)){
