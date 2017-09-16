@@ -43,15 +43,15 @@ namespace org\hrg\php_hipster_sql{
 			return "'".$this->escape($str)."'";
 		}
 
-		function q($sql=null){
-			return new Query(func_num_args() != 1 ? func_get_args():$sql);
+		function q(){
+			return Query::from_args(func_get_args());
 		}
 
-		function prepare($sql=null){
-			return new Prepared(func_num_args() == 1 ? $sql:func_get_args());
+		function prepare(){
+			return Prepared::from_args(func_get_args());
 		}
 
-		/* Sanitize a value and make it ready for concat*/
+		/* Sanitize a value and make it ready for concat into a query string */
 		function q_value($str){
 			if( $str === "NULL" || is_null($str) ) return "NULL";
 			if(is_numeric($str) && $str[0] != "0" && $str[0] != "+") return $str;//nubers that have consistent representation
@@ -89,15 +89,16 @@ namespace org\hrg\php_hipster_sql{
 				if($arr[$i]->is_empty()) continue;
 
 				if($first)
-					$ret->append_one($prefix);
+					$ret->append($prefix);
 				else 
-					$ret->append_one($glue);
+					$ret->append($glue);
 				
-				$ret->append_one($arr[$i]);
+				$ret->append($arr[$i]);
 
 				$first = false;
 			}
-			if($suffix) $ret->append_one($suffix);
+
+			if($suffix) $ret->append($suffix);
 
 			return $ret;
 		}
@@ -122,44 +123,37 @@ namespace org\hrg\php_hipster_sql{
 				$ret[] = $arr[$i];
 			}
 			
-			$ret = new Query($ret);
-			if($suffix) $ret->append_one($suffix);
+			$ret = Query::from_args($ret);
+			if($suffix) $ret->append($suffix);
 
 			return $ret;
 		}
 
-		function build($query){
-			if(func_num_args() > 1) $query = func_get_args();
-			if($query instanceof Query) $query = $query->get_query_array();
-
-			if(is_array($query)){
+		function build(){
+			$arr = Query::from_args(func_get_args())->get_query_array();
 				
-				$count = count($query);
-				if($count == 0) return '';
-				if($count == 1) return $this->build($query[0]);
+			$count = count($arr);
+			if($count == 0) return '';
 
-				$ret = $query[0] instanceof Query ? '':$query[0];
+			$ret = '';
 
-				$evenOdd = 1;
-				for($i=1; $i<$count; $i++){
-				
-					$queryPart = $query[$i];
-				
-					if($queryPart instanceof Query){ // array instead of value is not allowed, as it would enable easy SQL injection 
-						$ret .= $this->build($queryPart->get_query_array());
-						$evenOdd = 1; // will be changed to 2 at the end of the loop.
-					}else if($evenOdd %2 == 0) 
-						$ret .= $queryPart; // all even index parts must be strings
-					else{
-						$ret .= $this->q_value($queryPart);
-					}
-
-					$evenOdd++;
+			$evenOdd = 0;
+			for($i=0; $i<$count; $i++){
+				$part = $arr[$i];
+			
+				if($part instanceof Query){ // array instead of value is not allowed, as it would enable easy SQL injection 
+					$ret .= $this->build($part);
+					$evenOdd = 1; // will be changed to 2 at the end of the loop.
+				}else if($evenOdd %2 == 0) 
+					$ret .= $part; // all even index parts must be strings
+				else{
+					$ret .= $this->q_value($part);
 				}
-				
-				return $ret;
+
+				$evenOdd++;
 			}
-			return $query;
+			
+			return $ret;
 		}
 
 		function build_insert($tableName, $values){
@@ -176,7 +170,7 @@ namespace org\hrg\php_hipster_sql{
 
 			$v[] = ')';
 			array_unshift($v,$ret);
-			return new Query($v);
+			return Query::from_args($v);
 		}
 
 		/** generate update statement out of an array */
@@ -197,12 +191,12 @@ namespace org\hrg\php_hipster_sql{
 				$delim = ', ';
 			}
 
-			$ret = new Query($ret);
+			$ret = Query::from_args($ret);
 
 			// filter is not optional on purpose to avoid accidental update on whole table 
 			if($filter != 'all_rows'){
 				$ret->append(' WHERE ');
-				$ret->append($filter);
+				$ret->_append($filter);
 			}
 
 			return $ret;

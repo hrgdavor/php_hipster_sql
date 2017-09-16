@@ -3,32 +3,25 @@
 namespace org\hrg\php_hipster_sql{
 
 	class Query{
-		protected $arr;
+		var $arr = array();
 
 		function __construct(){
-			$this->arr = $this->array_args(func_get_args());
-			if(count($this->arr) >0 && (!is_string($this->arr[0])) ) throw new \Exception('First element of a query must be an sql string: '.print_r($this->arr,true));
+			$this->_append(func_get_args());
+			if(count($this->arr) > 0 && (!is_string($this->arr[0]))){
+				throw new \Exception('First element of a query must be an sql string. Type is: '.gettype($this->arr[0]).".\n".print_r($this->arr,true));
+			}
+		}
+
+		static function from_args($args){
+			if(count($args) == 1 && $args[0] instanceof Query) return $args[0];
+
+			$q = new Query();
+			$q->_append($args);
+			return $q;
 		}
 
 		function get_query_array(){
 			return $this->arr;
-		}
-
-		// sanitize the argumets so methods can allow multiple variants
-		final function array_args($args){
-			$count = count($args);
-
-			if($count == 0)
-				return $args;
-			else if($count == 1){
-				if(is_array($args[0]))
-					return $this->array_args($args[0]);
-				else if($args[0] instanceof Query)
-					return $args[0]->arr;
-				else 
-					return array($args[0]);
-			}else
-				return $args;
 		}
 
 		function is_empty(){
@@ -36,12 +29,8 @@ namespace org\hrg\php_hipster_sql{
 		}
 
 		/** Append more queries to the existing one. Similar to concat, except it changes the firs array instead of returning new one.*/
-		final function append($sql){
-			$this->_append($this->array_args(func_get_args()));
-			// if(func_num_args() == 1) 
-			// 	$this->_append($sql);
-			// else 
-			// 	$this->_append_all($this->array_args(func_get_args()));
+		final function append(){
+			$this->_append(func_get_args());
 			return $this;
 		}
 
@@ -49,14 +38,6 @@ namespace org\hrg\php_hipster_sql{
 			$this->_append($query);
 		}
 		
-		function _append_all($arr){
-			$count = count($arr);
-			for($i=0; $i<$count; $i++){
-				$this->_append($arr[$i]);
-			}
-			return $this;
-		}
-
 		/** append value part to the query. */ 
 		function append_value($val){
 			if($val instanceof Query ){// if value is array, then it is actually a query that can be apended as usual
@@ -72,8 +53,7 @@ namespace org\hrg\php_hipster_sql{
 		}
 
 		function _append($right){
-			if($right instanceof Query) $right = $right->arr;
-			if(!is_array($right)) $right = array($right);// less cases to handle :)
+			if(!count($right)) return;
 
 			$countRight = count($right);
 			$countLeft = count($this->arr);
@@ -84,17 +64,16 @@ namespace org\hrg\php_hipster_sql{
 				$this->arr[$countLeft-1] .= $right[0];
 				$j=1;// move index to 1 to skip that one as it is already added
 			}
-
 			for(;$j<$countRight; $j++){
 				$this->arr[] = $right[$j];
 			}
 		}
 
 		function prepare(){
-			$params = array();
+			$params = array('');
 
 			$arr = array();
-			$this->_flatten($arr, $this->arr);
+			$this->_flatten($arr);
 
 			$sql = $arr[0];
 			
@@ -108,10 +87,9 @@ namespace org\hrg\php_hipster_sql{
 					$params[] = $arr[$i];
 				}
 			}
+			$params[0] = $sql;
 
-			$prep = new Prepared();
-			$prep->append_array($sql, $params);
-			return $prep;
+			return Prepared::from_args($params);
 		}
 
 		/* 
@@ -120,12 +98,14 @@ namespace org\hrg\php_hipster_sql{
 		This is utility to simplify generating prepared statements, as the preparing code does not have to vorry about nested queries.
 		*/
 		function flatten(){
-			$left = array();
-			$this->arr = $this->_flatten($left, $this->arr);
-			return $this;
+			$q = new Query();
+			$this->arr = $this->_flatten($q->arr);
+			return $q;
 		}
 
-		function _flatten(&$left, $right){
+		function _flatten(&$left, $right=null){
+			if($right === null) $right = $this->arr;
+
 			$countRight = count($right);
 			$evenOdd = 0;
 			for($i=0; $i<$countRight; $i++){

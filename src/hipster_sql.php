@@ -34,12 +34,16 @@ namespace {
 		return hip_get_db()->escape($str);
 	}
 
-	function hip_q($sql=null){
-		return hip_get_db()->q(func_num_args() == 1 ? $sql:func_get_args());
+	function hip_q(){
+		return hip_q_from_args(func_get_args());
 	}	
 
-	function hip_prepare($sql){
-		return new org\hrg\php_hipster_sql\Prepared(func_num_args() == 1 ? $sql:func_get_args());
+	function hip_q_from_args($args){
+		return org\hrg\php_hipster_sql\Query::from_args($args);
+	}	
+
+	function hip_prepare(){
+		return org\hrg\php_hipster_sql\Prepared::from_args(func_get_args());
 	}	
 
 	function hip_q_column($str){
@@ -62,8 +66,8 @@ namespace {
 		return hip_get_db()->implode_values($glue, $arr, $prefix, $suffix);
 	}
 
-	function hip_build($sql){
-		return hip_get_db()->build(func_num_args() > 1 ? func_get_args():$sql);
+	function hip_build(){
+		return hip_get_db()->build(hip_q_from_args(func_get_args()));
 	}
 
 	function hip_build_insert($tableName, $values){
@@ -80,7 +84,7 @@ namespace {
 	}
 
 	function hip_query($sql){
-		hip_get_db()->query(func_num_args() > 1 ? func_get_args():$sql);
+		hip_get_db()->query(hip_q_from_args(func_get_args()));
 	}
 
 	function hip_fetch_assoc(){
@@ -92,15 +96,15 @@ namespace {
 	}
 
 	function hip_update($sql){
-		hip_get_db()->update(func_num_args() > 1 ? func_get_args():$sql);
+		hip_get_db()->update(hip_q_from_args(func_get_args()));
 	}
 
 	function hip_insert($sql){
-		return hip_get_db()->insert(func_num_args() > 1 ? func_get_args():$sql);
+		return hip_get_db()->insert(hip_q_from_args(func_get_args()));
 	}
 
 	function hip_rows($sql){
-		return hip_get_db()->rows(func_num_args() > 1 ? func_get_args():$sql);
+		return hip_get_db()->rows(hip_q_from_args(func_get_args()));
 	}
 
 	function hip_rows_limit($from, $limit, $sql){
@@ -109,15 +113,15 @@ namespace {
 	}
 
 	function hip_row($sql){
-		return hip_get_db()->row(func_num_args() > 1 ? func_get_args():$sql);
+		return hip_get_db()->row(hip_q_from_args(func_get_args()));
 	}
 
 	function hip_column($sql){
-		return hip_get_db()->column(func_num_args() > 1 ? func_get_args():$sql);
+		return hip_get_db()->column(hip_q_from_args(func_get_args()));
 	}
 
 	function hip_one($sql){
-		return hip_get_db()->one(func_num_args() > 1 ? func_get_args():$sql);
+		return hip_get_db()->one(hip_q_from_args(func_get_args()));
 	}
 
 }

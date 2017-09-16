@@ -94,12 +94,12 @@ assert_equal(
 
 /** TEST prepare */
 assert_equal(
-	hip_q( array('WHERE id=', 1 ) )->prepare(),
+	hip_q('WHERE id=', 1)->prepare(),
 	array('sql'=>'WHERE id=?','args'=>array(1))
 );
 
 assert_equal(
-	hip_q( array('WHERE id=', 1, ' AND is_deleted=',0 ) )->prepare(),
+	hip_q('WHERE id=', 1, ' AND is_deleted=',0)->prepare(),
 	array('sql'=>'WHERE id=? AND is_deleted=?','args'=>array(1,0))
 );
 

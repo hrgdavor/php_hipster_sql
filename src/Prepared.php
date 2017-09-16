@@ -6,22 +6,28 @@ namespace org\hrg\php_hipster_sql{
 		var $sql = "";
 		var $args = array();
 
-		function __construct($sql=null){
-			$this->append(func_num_args() == 1 && is_array($sql) ? $sql:func_get_args());
+		function __construct(){
+			$this->_append(func_get_args());
 		}
 
-		function append($sql=null){
-			$arr = (func_num_args() == 1 && is_array($sql)) ? $sql : func_get_args();
+		/* Create new instance from array to enable forwarding func_get_args from functions that accept varargs */
+		static function from_args(&$args){
+			$p = new Prepared();
+			$p->_append($args);
+			return $p;
+		}
 
-			$this->append_array($arr[0],array_slice($arr, 1));
+		/* Append using varargs for neater code */
+		function append(){
+			$this->_append(func_get_args());
 		}
 		
-		function append_array($sql, $args){
-			
-			$this->sql .= $sql;
-			
+		/* Append from array to enable forwarding func_get_args from functions that accept varargs */
+		function _append(&$args){
+			$this->sql .= $args[0];
+
 			$count = count($args);
-			$i=0; 
+			$i=1; 
 
 			while($i<$count){
 				$this->args[] = $args[$i];
@@ -29,12 +35,5 @@ namespace org\hrg\php_hipster_sql{
 			}
 		}
 
-		function get_sql(){
-			return $this->sql;
-		}
-
-		function get_args(){
-			return $this->args;
-		}
 	}
 }

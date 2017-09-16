@@ -77,21 +77,19 @@ namespace org\hrg\php_hipster_sql{
 			@$this->connection->close();
 		}
 
-		function query($sql){
+		function query(){
 			$this->close_result();
 
-			if(func_num_args() > 1) $sql = func_get_args();
-			
-			if(!($sql instanceof Query)) $sql = new Query($sql);
+			$sql = Query::from_args(func_get_args());
 			
 			$this->last_query = $sql;
 			
 			$prepared = $sql->prepare();
 
-			$this->last_prepared = array($prepared->get_sql(), $prepared->get_args());
+			$this->last_prepared = array($prepared->sql, $prepared->args);
 
-			$this->result = $this->connection->prepare($prepared->get_sql()) or $this->qdie('QUERY PREPARE FAILED');
-			$this->result->execute($prepared->get_args()) or $this->qdie('QUERY FAILED');
+			$this->result = $this->connection->prepare($prepared->sql) or $this->qdie('QUERY PREPARE FAILED');
+			$this->result->execute($prepared->args) or $this->qdie('QUERY FAILED');
 
 
 			return $this->result;
@@ -131,11 +129,11 @@ namespace org\hrg\php_hipster_sql{
 		}
 
 		function rows_limit($from, $limit, $sql){
-			if(func_num_args() > 3) $sql = array_slice(func_get_args(),2);
+			$sql = Query::from_args(array_slice(func_get_args(),2));
 
 			if($limit == 0) return $this->rows($sql);
-			// DIRTY FIX STUPID PDO.. PDO treats parameters as strings, so create the string our selves, instead of using parameters 
-			$sqlWithLimit = new Query($sql);
+			// DIRTY FIX Annoying PDO behavior.. PDO treats parameters as strings, so create the string our selves, instead of using parameters 
+			$sqlWithLimit = $sql->flatten();
 			$sqlWithLimit->append(' LIMIT '. ($limit+0) .' OFFSET '. ($from+0));
 			return $this->rows($sqlWithLimit);
 		}
