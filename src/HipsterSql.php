@@ -130,7 +130,7 @@ namespace org\hrg\php_hipster_sql{
 		}
 
 		function build(){
-			$arr = Query::from_args(func_get_args())->get_query_array();
+			$arr = Query::from_args(func_get_args())->arr;
 				
 			$count = count($arr);
 			if($count == 0) return '';
@@ -207,7 +207,7 @@ namespace org\hrg\php_hipster_sql{
 
 		function get_info(){
 			$last_query = $this->last_query();
-			if($last_query && $last_query instanceof Query) $last_query = $last_query->get_query_array();
+			if($last_query && $last_query instanceof Query) $last_query = $last_query->arr;
 
 			$ret = array(
 				'code'=>$this->error_code(),

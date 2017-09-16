@@ -70,7 +70,7 @@ assert_equal(
 
 /** TEST implode_values */
 assert_equal(
-	$DB->implode_values(',', array(1,2,3) )->get_query_array(),
+	$DB->implode_values(',', array(1,2,3) )->arr,
 	array('',1,',',2,',',3)
 );
 
@@ -88,7 +88,7 @@ assert_equal(
 
 /** TEST flatten */
 assert_equal(
-	$DB->q( 'WHERE id=', 1, ' AND pasword=', $DB->q('PASSWORD(','aaa',')') ) ->flatten()->get_query_array(),
+	$DB->q( 'WHERE id=', 1, ' AND pasword=', $DB->q('PASSWORD(','aaa',')') ) ->flatten()->arr,
 	array('WHERE id=', 1, ' AND pasword=PASSWORD(','aaa',')') 
 );
 

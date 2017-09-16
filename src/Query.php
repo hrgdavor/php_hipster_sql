@@ -20,10 +20,6 @@ namespace org\hrg\php_hipster_sql{
 			return $q;
 		}
 
-		function get_query_array(){
-			return $this->arr;
-		}
-
 		function is_empty(){
 			return count($this->arr) == 0;
 		}
