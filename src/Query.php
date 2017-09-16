@@ -95,7 +95,7 @@ namespace org\hrg\php_hipster_sql{
 		*/
 		function flatten(){
 			$q = new Query();
-			$this->arr = $this->_flatten($q->arr);
+			$this->_flatten($q->arr);
 			return $q;
 		}
 
