@@ -29,10 +29,6 @@ namespace org\hrg\php_hipster_sql{
 			$this->_append(func_get_args());
 			return $this;
 		}
-
-		final function append_one($query){
-			$this->_append($query);
-		}
 		
 		/** append value part to the query. */ 
 		function append_value($val){
@@ -58,8 +54,9 @@ namespace org\hrg\php_hipster_sql{
 			if($countLeft %2 == 1 && !($this->arr[$countLeft-1] instanceof Query) && !($right[0] instanceof Query)){
 				// last element is a query string, so concat the last element from $this->arr and first element from $right
 				$this->arr[$countLeft-1] .= $right[0];
-				$j=1;// move index to 1 to skip that one as it is already added
+				$j=1;
 			}
+
 			for(;$j<$countRight; $j++){
 				$this->arr[] = $right[$j];
 			}
