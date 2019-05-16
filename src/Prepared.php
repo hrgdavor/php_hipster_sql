@@ -11,7 +11,7 @@ namespace org\hrg\php_hipster_sql{
 		}
 
 		/* Create new instance from array to enable forwarding func_get_args from functions that accept varargs */
-		static function from_args(&$args){
+		static function from_args($args){
 			$p = new Prepared();
 			$p->_append($args);
 			return $p;
@@ -23,7 +23,7 @@ namespace org\hrg\php_hipster_sql{
 		}
 		
 		/* Append from array to enable forwarding func_get_args from functions that accept varargs */
-		function _append(&$args){
+		function _append($args){
 			$this->sql .= $args[0];
 
 			$count = count($args);

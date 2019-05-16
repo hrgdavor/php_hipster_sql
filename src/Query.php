@@ -7,8 +7,8 @@ namespace org\hrg\php_hipster_sql{
 
 		function __construct(){
 			$this->_append(func_get_args());
-			if(count($this->arr) > 0 && (!is_string($this->arr[0]))){
-				throw new \Exception('First element of a query must be an sql string. Type is: '.gettype($this->arr[0]).".\n".print_r($this->arr,true));
+			if(count($this->arr) >0 && (!is_string($this->arr[0]) && !($this->arr[0] instanceof Query)) ){
+				throw new \Exception('First element of a query must be an sql string or Query. Type is: '.gettype($this->arr[0]).".\n".print_r($this->arr,true));
 			}
 		}
 
@@ -46,6 +46,7 @@ namespace org\hrg\php_hipster_sql{
 
 		function _append($right){
 			if(!count($right)) return;
+			if($right instanceof Query) $right = $right->arr;
 
 			$countRight = count($right);
 			$countLeft = count($this->arr);
